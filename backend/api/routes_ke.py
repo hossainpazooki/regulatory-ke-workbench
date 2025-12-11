@@ -13,8 +13,15 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import Any
 
+from datetime import datetime, timezone
+
 from backend.rules import RuleLoader, DecisionEngine
-from backend.rules.schema import ConsistencyStatus
+from backend.rules.schema import (
+    ConsistencyStatus,
+    ConsistencyBlock,
+    ConsistencySummary,
+    ConsistencyEvidence,
+)
 from backend.verify import ConsistencyEngine, verify_rule
 from backend.analytics import ErrorPatternAnalyzer, DriftDetector
 from backend.rag import RuleContextRetriever
@@ -83,6 +90,23 @@ class DriftReportResponse(BaseModel):
     degraded_categories: list[str]
     improved_categories: list[str]
     summary: str
+
+
+class HumanReviewRequest(BaseModel):
+    """Request to submit human review."""
+    label: str = Field(..., description="Review decision: consistent, inconsistent, unknown")
+    notes: str = Field(..., description="Reviewer notes explaining the decision")
+    reviewer_id: str = Field(..., description="Identifier of the human reviewer")
+
+
+class HumanReviewResponse(BaseModel):
+    """Response from human review submission."""
+    rule_id: str
+    status: str
+    confidence: float
+    review_tier: int = 4
+    reviewer_id: str
+    message: str
 
 
 # =============================================================================
@@ -379,3 +403,123 @@ def get_related_rules(rule_id: str, top_k: int = Query(default=5)) -> list[dict]
         }
         for r in related
     ]
+
+
+# =============================================================================
+# Human Review Endpoints
+# =============================================================================
+
+@router.post("/rules/{rule_id}/review", response_model=HumanReviewResponse)
+def submit_human_review(rule_id: str, request: HumanReviewRequest):
+    """Submit a human review (Tier 4) for a rule.
+
+    Human reviews are authoritative and override automated check labels.
+    This appends a Tier 4 evidence item and updates the overall status.
+    """
+    if request.label not in ("consistent", "inconsistent", "unknown"):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid label. Must be: consistent, inconsistent, unknown"
+        )
+
+    loader = get_rule_loader()
+    rule = loader.get_rule(rule_id)
+
+    if rule is None:
+        raise HTTPException(status_code=404, detail=f"Rule not found: {rule_id}")
+
+    # Create Tier 4 human review evidence
+    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    # Map label to score
+    score = {
+        "consistent": 1.0,
+        "inconsistent": 0.0,
+        "unknown": 0.5,
+    }.get(request.label, 0.5)
+
+    human_evidence = ConsistencyEvidence(
+        tier=4,
+        category="human_review",
+        label="pass" if request.label == "consistent" else (
+            "fail" if request.label == "inconsistent" else "warning"
+        ),
+        score=score,
+        details=f"Human review by {request.reviewer_id}: {request.notes}",
+        rule_element="__rule__",
+        timestamp=timestamp,
+    )
+
+    # Get existing consistency or create new
+    if rule.consistency:
+        existing_evidence = list(rule.consistency.evidence)
+        existing_evidence.append(human_evidence)
+    else:
+        existing_evidence = [human_evidence]
+
+    # Human review is authoritative - determine status based on human label
+    new_status = {
+        "consistent": ConsistencyStatus.VERIFIED,
+        "inconsistent": ConsistencyStatus.INCONSISTENT,
+        "unknown": ConsistencyStatus.NEEDS_REVIEW,
+    }.get(request.label, ConsistencyStatus.NEEDS_REVIEW)
+
+    # Calculate new confidence (weighted towards human review)
+    if rule.consistency:
+        # Average existing confidence with human score, weighted 60% human
+        existing_conf = rule.consistency.summary.confidence
+        new_confidence = (0.4 * existing_conf) + (0.6 * score)
+    else:
+        new_confidence = score
+
+    # Create updated consistency block
+    new_summary = ConsistencySummary(
+        status=new_status,
+        confidence=round(new_confidence, 4),
+        last_verified=timestamp,
+        verified_by=f"human:{request.reviewer_id}",
+        notes=request.notes,
+    )
+
+    rule.consistency = ConsistencyBlock(
+        summary=new_summary,
+        evidence=existing_evidence,
+    )
+
+    return HumanReviewResponse(
+        rule_id=rule_id,
+        status=new_status.value,
+        confidence=new_confidence,
+        review_tier=4,
+        reviewer_id=request.reviewer_id,
+        message=f"Human review submitted. Status updated to {new_status.value}.",
+    )
+
+
+@router.get("/rules/{rule_id}/reviews")
+def get_rule_reviews(rule_id: str) -> list[dict]:
+    """Get all human reviews for a rule."""
+    loader = get_rule_loader()
+    rule = loader.get_rule(rule_id)
+
+    if rule is None:
+        raise HTTPException(status_code=404, detail=f"Rule not found: {rule_id}")
+
+    if not rule.consistency:
+        return []
+
+    # Filter for Tier 4 human reviews
+    reviews = [
+        {
+            "tier": ev.tier,
+            "category": ev.category,
+            "label": ev.label,
+            "score": ev.score,
+            "details": ev.details,
+            "timestamp": ev.timestamp,
+        }
+        for ev in rule.consistency.evidence
+        if ev.tier == 4 and ev.category == "human_review"
+    ]
+
+    return reviews

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import get_settings
-from backend.api import qa_router, decide_router, rules_router
+from backend.api import qa_router, decide_router, rules_router, ke_router
 
 
 @asynccontextmanager
@@ -48,6 +48,7 @@ def create_app() -> FastAPI:
     app.include_router(qa_router)
     app.include_router(decide_router)
     app.include_router(rules_router)
+    app.include_router(ke_router)
 
     @app.get("/")
     async def root():
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
                 "qa": "/qa/ask - Factual Q&A",
                 "decide": "/decide - Regulatory decisions",
                 "rules": "/rules - Rule inspection",
+                "ke": "/ke/* - Knowledge Engineering workbench",
             },
         }
 

@@ -6,7 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import get_settings
-from backend.api import qa_router, decide_router, rules_router, ke_router
+from backend.api import qa_router, decide_router, rules_router, ke_router, production_router
+from backend.persistence import init_db
 
 
 @asynccontextmanager
@@ -17,6 +18,10 @@ async def lifespan(app: FastAPI):
     print(f"Starting {settings.app_name}...")
     print(f"Rules directory: {settings.rules_dir}")
     print(f"Vector search enabled: {settings.enable_vector_search}")
+
+    # Initialize database
+    print("Initializing database...")
+    init_db()
 
     yield
 
@@ -49,6 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(decide_router)
     app.include_router(rules_router)
     app.include_router(ke_router)
+    app.include_router(production_router)
 
     @app.get("/")
     async def root():
@@ -61,6 +67,7 @@ def create_app() -> FastAPI:
                 "decide": "/decide - Regulatory decisions",
                 "rules": "/rules - Rule inspection",
                 "ke": "/ke/* - Knowledge Engineering workbench",
+                "v2": "/v2/* - Production API with compiled IR",
             },
         }
 

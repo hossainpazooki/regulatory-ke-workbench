@@ -4,41 +4,56 @@ A computational law platform for MiCA, RWA tokenization, and stablecoin framewor
 
 **Live Demo:** [pazooki.streamlit.app](https://pazooki.streamlit.app)
 
-## Quick Start
+## Architecture
 
-```bash
-# Clone and setup
-git clone https://github.com/hossainpazooki/RWAs.git
-cd RWAs
-python -m venv .venv
-.\.venv\Scripts\Activate  # Windows
-source .venv/bin/activate  # macOS/Linux
-pip install -r requirements.txt
+```mermaid
+flowchart TB
+    subgraph Corpus["Legal Corpus"]
+        LC1[MiCA 2023]
+        LC2[FCA Crypto 2024]
+        LC3[GENIUS Act 2025]
+    end
 
-# Run tests
-pytest tests/ -v
+    subgraph Core["Core Engine"]
+        ONT[Ontology Layer]
+        DSL[Rule DSL]
+        DE[Decision Engine]
+        CE[Consistency Engine]
+    end
 
-# Launch app
-streamlit run frontend/Home.py
+    subgraph Jurisdiction["Multi-Jurisdiction"]
+        JR[Resolver]
+        JE[Parallel Evaluator]
+        CD[Conflict Detection]
+        PS[Pathway Synthesis]
+    end
+
+    subgraph Production["Production Layer"]
+        COMP[Compiler]
+        IDX[Premise Index]
+        CACHE[IR Cache]
+    end
+
+    subgraph UI["Interfaces"]
+        API[FastAPI]
+        ST[Streamlit UI]
+    end
+
+    Corpus --> CE
+    ONT --> DSL
+    DSL --> DE
+    DSL --> COMP
+    COMP --> IDX
+    COMP --> CACHE
+    DE --> JE
+    JR --> JE
+    JE --> CD
+    CD --> PS
+    DE --> API
+    PS --> API
+    CE --> API
+    API --> ST
 ```
-
-Opens at `http://localhost:8501` with:
-- **Home** — Overview and instructions
-- **KE Workbench** — Rule inspection, decision trees, trace testing
-- **Production Demo** — Compiled IR, premise index, benchmarks
-- **Navigator** — Cross-border compliance analysis
-
-## API Server (Optional)
-
-```bash
-uvicorn backend.main:app --reload
-```
-
-Endpoints at `http://localhost:8000`:
-- `POST /decide` — Evaluate scenarios
-- `POST /navigate` — Cross-border compliance
-- `GET /rules` — List rules
-- `POST /v2/evaluate` — Production evaluation with O(1) lookup
 
 ## Project Structure
 
@@ -46,7 +61,7 @@ Endpoints at `http://localhost:8000`:
 backend/
 ├── ontology/       # Domain types (Actor, Instrument, Provision)
 ├── rules/          # YAML rules + decision engine
-├── jurisdiction/   # Multi-jurisdiction support (EU, UK, US)
+├── jurisdiction/   # Multi-jurisdiction (EU, UK, US)
 ├── compiler/       # YAML → IR compilation
 ├── verify/         # Semantic consistency engine
 └── api/            # FastAPI routes

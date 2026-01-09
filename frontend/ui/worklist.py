@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Literal
 import streamlit as st
 
 if TYPE_CHECKING:
-    from backend.rules.schema import Rule, ConsistencyBlock
+    from backend.rule_service.app.services.schema import Rule, ConsistencyBlock
 
 
 # =============================================================================

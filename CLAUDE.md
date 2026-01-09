@@ -2,59 +2,166 @@
 
 ## Overview
 
-This repo is a **computational law system** for tokenized real-world assets (RWAs).
-It has layered architecture:
+A **computational law system** for tokenized real-world assets (RWAs). The system provides executable legal logic, traceable decisions, and multi-jurisdiction compliance analysis.
 
-- Layer 1–2 (ontology + rule DSL) in **OCaml** under `ocaml/core/`
-- Layer 3+ (decision engine, API, RAG) in **Python** under `backend/`
+## Project Structure
 
-The goal: executable legal logic, traceable decisions, strong typing, and clear documentation.
+```
+droit/
+├── backend/
+│   ├── core/                           # Shared components
+│   │   ├── config.py                   # Application settings
+│   │   ├── database.py                 # SQLModel engine/session
+│   │   ├── api/                        # FastAPI routes
+│   │   │   ├── main.py                 # App entry point
+│   │   │   ├── routes_decide.py        # /decide endpoint
+│   │   │   ├── routes_ke.py            # KE dashboard endpoints
+│   │   │   └── routes_production.py    # Production API
+│   │   ├── ontology/                   # Domain types
+│   │   │   ├── types.py                # Provision, Actor, Instrument
+│   │   │   ├── scenario.py             # Scenario model
+│   │   │   └── jurisdiction.py         # JurisdictionCode, RuleConflict
+│   │   └── visualization/              # Tree rendering adapters
+│   │
+│   ├── rule_service/                   # Rule management + evaluation
+│   │   ├── app/services/
+│   │   │   ├── loader.py               # RuleLoader, Rule, SourceRef
+│   │   │   ├── engine.py               # DecisionEngine, TraceStep
+│   │   │   ├── schema.py               # ConsistencyBlock, ConsistencyEvidence
+│   │   │   └── jurisdiction/           # Multi-jurisdiction navigation
+│   │   │       ├── resolver.py         # resolve_jurisdictions
+│   │   │       ├── evaluator.py        # evaluate_jurisdiction
+│   │   │       ├── conflicts.py        # detect_conflicts
+│   │   │       └── pathway.py          # synthesize_pathway
+│   │   └── data/                       # YAML rule packs
+│   │       ├── mica_authorization.yaml
+│   │       ├── mica_stablecoin.yaml
+│   │       ├── fca_crypto.yaml
+│   │       └── rwa_authorization.yaml
+│   │
+│   ├── database_service/               # Data access middleware
+│   │   └── app/services/
+│   │       ├── database.py             # init_db, seed operations
+│   │       ├── migration.py            # YAML to DB migration
+│   │       ├── compiler/               # Rule IR compilation
+│   │       │   ├── ir.py               # RuleIR, CompiledCheck
+│   │       │   ├── compiler.py         # RuleCompiler
+│   │       │   └── premise_index.py    # O(1) premise lookup
+│   │       ├── runtime/                # IR execution
+│   │       │   ├── executor.py         # RuleRuntime
+│   │       │   └── cache.py            # IRCache
+│   │       └── repositories/           # Database CRUD
+│   │
+│   ├── verification_service/           # Consistency engine
+│   │   └── app/services/
+│   │       └── consistency_engine.py   # ConsistencyEngine (Tier 0-4)
+│   │
+│   ├── analytics_service/              # Error analysis + drift
+│   │   └── app/services/
+│   │       ├── error_patterns.py       # ErrorPatternAnalyzer
+│   │       └── drift.py                # DriftDetector
+│   │
+│   ├── rag_service/                    # Retrieval + Q&A
+│   │   └── app/services/
+│   │       ├── retrieval.py            # Retriever, BM25Index
+│   │       ├── corpus_loader.py        # Legal document loading
+│   │       ├── rule_context.py         # RuleContextRetriever
+│   │       └── frontend_helpers.py     # UI helper functions
+│   │
+│   ├── rule_embedding_service/         # Rule embeddings
+│   │   └── app/services/
+│   │       └── embedding.py            # Embedding operations
+│   │
+│   └── main.py                         # Application entry
+│
+├── frontend/                           # Streamlit UI
+│   ├── Home.py                         # Landing page
+│   ├── pages/
+│   │   ├── 1_KE_Workbench.py          # Rule editor + verification
+│   │   ├── 2_Production_Demo.py       # Production deployment demo
+│   │   └── 3_Navigator.py             # Cross-border navigator
+│   └── ui/                             # Shared UI components
+│
+├── data/
+│   └── legal/                          # Legal corpus (MiCA, DLT Pilot, etc.)
+│
+├── docs/                               # Design documentation
+│   ├── engine_design.md
+│   ├── rule_dsl.md
+│   └── knowledge_model.md
+│
+└── tests/                              # Test suite (474 tests)
+```
 
-## Project structure (desired)
+## Key Concepts
 
-- `ocaml/core/`              – OCaml ontology + rule DSL + tests
-- `backend/ontology/`        – (optional) Python mirrors of OCaml types if needed
-- `backend/rules/`           – YAML rule packs (MiCA etc.) + decision engine
-- `backend/rag/`             – retrieval utilities for factual Q&A + rule context
-- `backend/verify/`          – semantic consistency engine (Tier 0-4 checks)
-- `backend/analytics/`       – error pattern analysis + drift detection
-- `backend/visualization/`   – tree adapter for decision tree rendering
-- `backend/api/`             – FastAPI endpoints (`/decide`, `/ke/*` internal endpoints)
-- `frontend/`                – Streamlit KE dashboard
-- `docs/`                    – design docs (`ontology_design.md`, `rule_dsl_design.md`, `engine_design.md`, `knowledge_model.md`)
-- `tests/`                   – Python tests for engine/API; OCaml tests live in `ocaml/core/test/`
+### Rule Model
+Rules are stored in YAML files under `backend/rule_service/data/`. Each rule has:
+- `rule_id`: Unique identifier (e.g., `mica_art36_public_offer_authorization`)
+- `source`: Legal source reference (document_id, article)
+- `jurisdiction`: JurisdictionCode (EU, UK, US, CH, SG)
+- `decision_tree`: Nested conditions with outcomes
+- `effective_date`: When the rule takes effect
 
-## Build & development commands
+### Consistency Engine (Tier 0-4)
+- **Tier 0**: Schema validation (required fields, types)
+- **Tier 1**: Lexical checks (dates, ID format, tags)
+- **Tier 2**: Semantic similarity (rule vs source text)
+- **Tier 3**: NLI entailment checks
+- **Tier 4**: Cross-rule consistency (conflict detection)
 
-### OCaml (Layers 1–2)
+### Cross-Border Navigation
+The jurisdiction module handles multi-jurisdiction compliance:
+1. `resolve_jurisdictions`: Identify applicable regimes
+2. `evaluate_jurisdiction`: Assess compliance per jurisdiction
+3. `detect_conflicts`: Find cross-border rule conflicts
+4. `synthesize_pathway`: Generate compliance pathway
 
-From repo root:
+## Development Commands
 
-- `cd ocaml`
-- `dune build`
-- `dune runtest`
+```bash
+# Activate virtual environment
+.\.venv\Scripts\activate
 
-The active opam switch is `rwaproject`.
+# Run tests
+pytest
 
-### Python (Layers 3–5)
+# Run specific test file
+pytest tests/test_rules.py -v
 
-From repo root:
+# Run API server
+uvicorn backend.core.api.main:app --reload
 
-- Activate venv: `.\.venv\Scripts\activate`
-- Install deps: `pip install -r requirements.txt`
-- Run tests: `pytest`
-- Run API dev server: `uvicorn backend.api.main:app --reload`
-- Run KE dashboard: `streamlit run frontend/ke_dashboard.py`
+# Run Streamlit dashboard
+streamlit run frontend/Home.py
+```
 
-## How Claude Code should behave
+## Import Patterns
 
-- Treat OCaml `ocaml/core/ontology.ml` and `ocaml/core/rule_dsl.ml` as the **source of truth** for the legal ontology and rule schema.
-- Keep legal logic in **YAML rule files** under `backend/rules/`, not hard-coded in Python.
-- Each layer should be built and tested in isolation:
-  - Layer 1: ontology types + docs + OCaml tests
-  - Layer 2: rule DSL types + YAML examples + OCaml tests
-  - Layer 3: Python decision engine + tests
-  - Layer 4: FastAPI API + tests
-  - Layer 5: RAG + extra tests
-- Update `docs/*.md` whenever we change the ontology, rule DSL, or engine behaviour.
-- Prefer small, incremental changes over huge refactors in one go.
+```python
+# Core ontology types
+from backend.core.ontology import Scenario, JurisdictionCode
+
+# Rule service
+from backend.rule_service.app.services import RuleLoader, DecisionEngine, Rule
+
+# Verification
+from backend.verification_service.app.services import ConsistencyEngine
+
+# Database operations
+from backend.database_service.app.services import init_db_with_seed, migrate_yaml_rules
+
+# RAG and retrieval
+from backend.rag_service.app.services import Retriever, BM25Index
+
+# Analytics
+from backend.analytics_service.app.services import ErrorPatternAnalyzer, DriftDetector
+```
+
+## Guidelines
+
+1. **Rule files**: Keep legal logic in YAML under `backend/rule_service/data/`, not hard-coded in Python
+2. **Testing**: Run `pytest` after changes, target 474+ tests passing
+3. **Imports**: Use the canonical service paths shown above
+4. **Documentation**: Update `docs/*.md` when changing ontology or engine behavior
+5. **Incremental changes**: Prefer small, focused changes over large refactors

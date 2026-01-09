@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.rag.frontend_helpers import (
+from backend.rag_service.app.services.frontend_helpers import (
     get_rule_context,
     RuleContextPayload,
     _get_rule_loader,

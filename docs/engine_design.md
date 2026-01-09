@@ -341,7 +341,7 @@ Each `meta.yaml` contains:
 #### Corpus Loader
 
 ```python
-from backend.rag import load_legal_document, load_all_legal_documents
+from backend.rag_service.app.services import load_legal_document, load_all_legal_documents
 
 # Load a specific document
 doc = load_legal_document("mica_2023")

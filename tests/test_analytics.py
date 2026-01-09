@@ -5,19 +5,19 @@ from __future__ import annotations
 import pytest
 from datetime import date
 
-from backend.rules.loader import (
+from backend.rule_service.app.services.loader import (
     Rule,
     RuleLoader,
     SourceRef,
     DecisionLeaf,
 )
-from backend.rules.schema import (
+from backend.rule_service.app.services.schema import (
     ConsistencyBlock,
     ConsistencySummary,
     ConsistencyEvidence,
     ConsistencyStatus,
 )
-from backend.analytics import (
+from backend.analytics_service.app.services import (
     ErrorPatternAnalyzer,
     ErrorPattern,
     CategoryStats,

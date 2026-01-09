@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.rules.schema import (
+from backend.rule_service.app.services.schema import (
     Rule,
     DecisionBranch,
     DecisionLeaf,
@@ -13,7 +13,7 @@ from backend.rules.schema import (
     ConsistencyEvidence,
     ConsistencyStatus,
 )
-from backend.visualization.tree_adapter import (
+from backend.core.visualization.tree_adapter import (
     TreeAdapter,
     TreeNode,
     TreeEdge,

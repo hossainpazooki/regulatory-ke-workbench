@@ -4,9 +4,9 @@ import pytest
 from pathlib import Path
 from datetime import date
 
-from backend.ontology import Scenario
-from backend.rules import RuleLoader, DecisionEngine
-from backend.rules.loader import Rule, ConditionSpec, DecisionNode, DecisionLeaf
+from backend.core.ontology import Scenario
+from backend.rule_service.app.services import RuleLoader, DecisionEngine
+from backend.rule_service.app.services.loader import Rule, ConditionSpec, DecisionNode, DecisionLeaf
 
 
 class TestRuleLoader:
@@ -171,7 +171,7 @@ class TestConditionEvaluation:
         flat = scenario.to_flat_dict()
 
         # Test internal condition evaluation
-        from backend.rules.loader import ConditionSpec
+        from backend.rule_service.app.services.loader import ConditionSpec
 
         cond = ConditionSpec(field="instrument_type", operator="==", value="art")
         result, _ = decision_engine._evaluate_condition(cond, flat, "test")
@@ -181,7 +181,7 @@ class TestConditionEvaluation:
         scenario = Scenario(instrument_type="art")
         flat = scenario.to_flat_dict()
 
-        from backend.rules.loader import ConditionSpec
+        from backend.rule_service.app.services.loader import ConditionSpec
 
         cond = ConditionSpec(field="instrument_type", operator="in", value=["art", "emt"])
         result, _ = decision_engine._evaluate_condition(cond, flat, "test")
@@ -195,7 +195,7 @@ class TestConditionEvaluation:
         scenario = Scenario(instrument_type="art", authorized=None)
         flat = scenario.to_flat_dict()
 
-        from backend.rules.loader import ConditionSpec
+        from backend.rule_service.app.services.loader import ConditionSpec
 
         cond = ConditionSpec(field="instrument_type", operator="exists", value=True)
         result, _ = decision_engine._evaluate_condition(cond, flat, "test")

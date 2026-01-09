@@ -17,15 +17,15 @@ import streamlit as st
 import asyncio
 from datetime import datetime
 
-from backend.jurisdiction.resolver import resolve_jurisdictions, get_equivalences
-from backend.jurisdiction.evaluator import evaluate_jurisdiction
-from backend.jurisdiction.conflicts import detect_conflicts
-from backend.jurisdiction.pathway import (
+from backend.rule_service.app.services.jurisdiction.resolver import resolve_jurisdictions, get_equivalences
+from backend.rule_service.app.services.jurisdiction.evaluator import evaluate_jurisdiction
+from backend.rule_service.app.services.jurisdiction.conflicts import detect_conflicts
+from backend.rule_service.app.services.jurisdiction.pathway import (
     synthesize_pathway,
     aggregate_obligations,
     estimate_timeline,
 )
-from backend.persistence.database import init_db_with_seed
+from backend.database_service.app.services.database import init_db_with_seed
 
 # Initialize database
 init_db_with_seed()

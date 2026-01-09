@@ -6,8 +6,8 @@ import pytest
 from pathlib import Path
 from datetime import date
 
-from backend.rules.loader import RuleLoader, Rule
-from backend.rules.schema import (
+from backend.rule_service.app.services.loader import RuleLoader, Rule
+from backend.rule_service.app.services.schema import (
     ConsistencyBlock,
     ConsistencySummary,
     ConsistencyEvidence,
@@ -121,7 +121,7 @@ class TestRuleWithConsistency:
         )
 
         # Create rule with consistency
-        from backend.rules.loader import (
+        from backend.rule_service.app.services.loader import (
             Rule,
             SourceRef,
             ConditionGroupSpec,
@@ -154,7 +154,7 @@ class TestSourceRefExtensions:
 
     def test_source_ref_with_paragraphs(self):
         """Test SourceRef with paragraph references."""
-        from backend.rules.loader import SourceRef
+        from backend.rule_service.app.services.loader import SourceRef
 
         source = SourceRef(
             document_id="mica_2023",
@@ -173,7 +173,7 @@ class TestDecisionEngineWithConsistency:
 
     def test_decision_result_has_rule_metadata(self, decision_engine):
         """Test that DecisionResult includes rule_metadata."""
-        from backend.ontology import Scenario
+        from backend.core.ontology import Scenario
 
         scenario = Scenario(
             instrument_type="art",
@@ -192,7 +192,7 @@ class TestDecisionEngineWithConsistency:
 
     def test_rule_metadata_consistency_none_when_not_present(self, decision_engine):
         """Test that consistency is None when rule has no consistency block."""
-        from backend.ontology import Scenario
+        from backend.core.ontology import Scenario
 
         scenario = Scenario(
             instrument_type="art",
@@ -212,7 +212,7 @@ class TestRuleSaveLoad:
 
     def test_save_rule_with_consistency(self, tmp_path: Path):
         """Test saving a rule with consistency block to YAML."""
-        from backend.rules.loader import (
+        from backend.rule_service.app.services.loader import (
             Rule,
             RuleLoader,
             SourceRef,

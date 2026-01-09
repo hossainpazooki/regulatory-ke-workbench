@@ -3,15 +3,15 @@
 import pytest
 from pathlib import Path
 
-from backend.ontology import Scenario
-from backend.rules import RuleLoader, DecisionEngine
-from backend.rag import Retriever, BM25Index
+from backend.core.ontology import Scenario
+from backend.rule_service.app.services import RuleLoader, DecisionEngine
+from backend.rag_service.app.services import Retriever, BM25Index
 
 
 @pytest.fixture
 def rules_dir() -> Path:
     """Path to the rules directory."""
-    return Path(__file__).parent.parent / "backend" / "rules"
+    return Path(__file__).parent.parent / "backend" / "rule_service" / "data"
 
 
 @pytest.fixture

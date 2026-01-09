@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from datetime import date
 
-from backend.rules.loader import (
+from backend.rule_service.app.services.loader import (
     Rule,
     SourceRef,
     ConditionGroupSpec,
@@ -13,11 +13,11 @@ from backend.rules.loader import (
     DecisionNode,
     DecisionLeaf,
 )
-from backend.rules.schema import (
+from backend.rule_service.app.services.schema import (
     ConsistencyStatus,
     ConsistencyBlock,
 )
-from backend.verify.consistency_engine import (
+from backend.verification_service.app.services.consistency_engine import (
     ConsistencyEngine,
     verify_rule,
     check_schema_valid,
@@ -372,7 +372,7 @@ class TestSummaryComputation:
 
     def test_summary_verified_all_pass(self):
         """Summary is verified when all evidence passes."""
-        from backend.rules.schema import ConsistencyEvidence
+        from backend.rule_service.app.services.schema import ConsistencyEvidence
 
         evidence = [
             ConsistencyEvidence(
@@ -391,7 +391,7 @@ class TestSummaryComputation:
 
     def test_summary_needs_review_with_warnings(self):
         """Summary needs review when there are warnings."""
-        from backend.rules.schema import ConsistencyEvidence
+        from backend.rule_service.app.services.schema import ConsistencyEvidence
 
         evidence = [
             ConsistencyEvidence(
@@ -406,7 +406,7 @@ class TestSummaryComputation:
 
     def test_summary_inconsistent_with_fail(self):
         """Summary is inconsistent when any check fails."""
-        from backend.rules.schema import ConsistencyEvidence
+        from backend.rule_service.app.services.schema import ConsistencyEvidence
 
         evidence = [
             ConsistencyEvidence(

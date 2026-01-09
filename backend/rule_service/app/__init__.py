@@ -1,0 +1,1 @@
+"""Rule service application package."""

@@ -23,9 +23,9 @@ import streamlit as st
 import pandas as pd
 
 # Backend imports
-from backend.rules import RuleLoader, DecisionEngine
-from backend.compiler import RuleCompiler, PremiseIndexBuilder, RuleIR
-from backend.runtime import RuleRuntime, IRCache, get_ir_cache
+from backend.rule_service.app.services import RuleLoader, DecisionEngine
+from backend.database_service.app.services.compiler import RuleCompiler, PremiseIndexBuilder, RuleIR
+from backend.database_service.app.services.runtime import RuleRuntime, IRCache, get_ir_cache
 
 # -----------------------------------------------------------------------------
 # Page Configuration

@@ -8,23 +8,23 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from backend.persistence.database import (
+from backend.database_service.app.services.database import (
     init_db,
     get_db,
     set_db_path,
     get_table_stats,
     reset_db,
 )
-from backend.persistence.repositories.rule_repo import RuleRepository
-from backend.persistence.repositories.verification_repo import VerificationRepository
-from backend.persistence.migration import (
+from backend.database_service.app.services.repositories.rule_repo import RuleRepository
+from backend.database_service.app.services.repositories.verification_repo import VerificationRepository
+from backend.database_service.app.services.migration import (
     migrate_yaml_rules,
     extract_premise_keys,
     load_rules_from_db,
     sync_rule_to_db,
     get_migration_status,
 )
-from backend.rules.loader import RuleLoader, ConditionGroupSpec, ConditionSpec
+from backend.rule_service.app.services.loader import RuleLoader, ConditionGroupSpec, ConditionSpec
 
 
 @pytest.fixture(autouse=True)
@@ -581,7 +581,7 @@ class TestMigration:
 
     def test_migrate_yaml_rules(self, temp_database):
         """Test migrating YAML rules to database."""
-        rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+        rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
 
         result = migrate_yaml_rules(rules_dir, clear_existing=True)
 
@@ -597,7 +597,7 @@ class TestMigration:
     def test_load_rules_from_db(self, temp_database):
         """Test loading rules from database as Rule objects."""
         # First migrate some rules
-        rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+        rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
         migrate_yaml_rules(rules_dir, clear_existing=True)
 
         # Load back from DB
@@ -611,7 +611,7 @@ class TestMigration:
     def test_sync_rule_to_db(self, temp_database):
         """Test syncing a single rule to database."""
         loader = RuleLoader()
-        rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+        rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
         rules = loader.load_directory(rules_dir)
 
         if rules:
@@ -628,7 +628,7 @@ class TestMigration:
     def test_get_migration_status(self, temp_database):
         """Test getting migration status."""
         # Migrate first
-        rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+        rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
         migrate_yaml_rules(rules_dir, clear_existing=True)
 
         status = get_migration_status()

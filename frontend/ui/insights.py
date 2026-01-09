@@ -79,7 +79,7 @@ def render_chart(
         html_renderer: Function to render tree_data as HTML
         height: Height of the HTML component in pixels
     """
-    from backend.visualization import is_supertree_available
+    from backend.core.visualization import is_supertree_available
 
     tab1, tab2 = st.tabs(["Visual", "Data"])
 

@@ -7,18 +7,18 @@ Tests IR execution, caching, and tracing.
 import pytest
 from pathlib import Path
 
-from backend.compiler.ir import (
+from backend.database_service.app.services.compiler.ir import (
     CompiledCheck,
     DecisionEntry,
     ObligationSpec,
     RuleIR,
 )
-from backend.compiler.compiler import compile_rule
-from backend.compiler.premise_index import PremiseIndexBuilder
-from backend.runtime.executor import RuleRuntime, execute_rule
-from backend.runtime.cache import IRCache, get_ir_cache, reset_ir_cache
-from backend.runtime.trace import ExecutionTrace, TraceStep, DecisionResult
-from backend.rules.loader import (
+from backend.database_service.app.services.compiler.compiler import compile_rule
+from backend.database_service.app.services.compiler.premise_index import PremiseIndexBuilder
+from backend.database_service.app.services.runtime.executor import RuleRuntime, execute_rule
+from backend.database_service.app.services.runtime.cache import IRCache, get_ir_cache, reset_ir_cache
+from backend.database_service.app.services.runtime.trace import ExecutionTrace, TraceStep, DecisionResult
+from backend.rule_service.app.services.loader import (
     RuleLoader,
     Rule,
     ConditionGroupSpec,
@@ -497,7 +497,7 @@ class TestIntegration:
 
     def test_execute_real_rules(self):
         """Test executing actual YAML rules."""
-        rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+        rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
         loader = RuleLoader()
         rules = loader.load_directory(rules_dir)
 

@@ -6,7 +6,7 @@ The visualization uses a custom HTML/CSS/JS renderer with collapsible <details> 
 
 import pytest
 
-from backend.visualization.supertree_utils import (
+from backend.core.visualization.supertree_utils import (
     SUPERTREE_AVAILABLE,
     is_supertree_available,
     render_rulebook_outline_html,

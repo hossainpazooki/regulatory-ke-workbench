@@ -7,15 +7,15 @@ works correctly with RWA rules.
 import pytest
 from pathlib import Path
 
-from backend.rules import RuleLoader
-from backend.verify import ConsistencyEngine
+from backend.rule_service.app.services import RuleLoader
+from backend.verification_service.app.services import ConsistencyEngine
 
 
 @pytest.fixture
 def rule_loader():
     """Create a rule loader with RWA rules loaded."""
     loader = RuleLoader()
-    rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+    rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
     loader.load_directory(rules_dir)
     return loader
 

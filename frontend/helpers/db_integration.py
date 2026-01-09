@@ -12,7 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from backend.persistence import (
+from backend.database_service.app.services import (
     init_db,
     RuleRepository,
     VerificationRepository,
@@ -21,12 +21,12 @@ from backend.persistence import (
     sync_rule_to_db,
     get_migration_status,
 )
-from backend.compiler import RuleCompiler, PremiseIndexBuilder
-from backend.compiler.ir import RuleIR
-from backend.compiler.optimizer import optimize_rule
-from backend.runtime import RuleRuntime, IRCache
-from backend.rules.loader import Rule
-from backend.rules.schema import ConsistencyBlock
+from backend.database_service.app.services.compiler import RuleCompiler, PremiseIndexBuilder
+from backend.database_service.app.services.compiler.ir import RuleIR
+from backend.database_service.app.services.compiler.optimizer import optimize_rule
+from backend.database_service.app.services.runtime import RuleRuntime, IRCache
+from backend.rule_service.app.services.loader import Rule
+from backend.rule_service.app.services.schema import ConsistencyBlock
 
 
 class DatabaseState:

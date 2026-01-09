@@ -6,8 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import get_settings
-from backend.api import qa_router, decide_router, rules_router, ke_router, production_router, navigate_router
-from backend.persistence import init_db
+from backend.core.api import qa_router, decide_router, rules_router, ke_router, production_router, navigate_router, embedding_router
+from backend.database_service.app.services import init_db
 
 
 @asynccontextmanager
@@ -56,6 +56,7 @@ def create_app() -> FastAPI:
     app.include_router(ke_router)
     app.include_router(production_router)
     app.include_router(navigate_router)
+    app.include_router(embedding_router)
 
     @app.get("/")
     async def root():
@@ -70,6 +71,7 @@ def create_app() -> FastAPI:
                 "ke": "/ke/* - Knowledge Engineering workbench",
                 "v2": "/v2/* - Production API with compiled IR",
                 "navigate": "/navigate - Cross-border compliance navigation",
+                "embedding": "/embedding/rules - Embedding rule CRUD",
             },
         }
 

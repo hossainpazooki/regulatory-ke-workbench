@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.rag import BM25Index, Retriever, chunk_text, Chunk
+from backend.rag_service.app.services import BM25Index, Retriever, chunk_text, Chunk
 
 
 class TestBM25Index:

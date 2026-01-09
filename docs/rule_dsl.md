@@ -276,8 +276,8 @@ backend/rules/
 Rules can be tested by providing scenarios:
 
 ```python
-from backend.ontology import Scenario
-from backend.rules import RuleLoader, DecisionEngine
+from backend.core.ontology import Scenario
+from backend.rule_service.app.services import RuleLoader, DecisionEngine
 
 loader = RuleLoader("backend/rules")
 loader.load_directory()

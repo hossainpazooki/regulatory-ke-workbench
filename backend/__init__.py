@@ -22,7 +22,7 @@ else:
     ENGINE_TYPE = "python"
 
 # Core ontology types
-from .ontology import (
+from .core.ontology import (
     Actor,
     ActorType,
     Activity,
@@ -44,16 +44,15 @@ from .ontology import (
 )
 
 # Rules and decision engine
-from .rules import (
+from .rule_service.app.services import (
     DecisionEngine,
-    DecisionResult,
     Rule,
     RuleLoader,
     TraceStep,
 )
 
 # Verification engine
-from .verify import (
+from .verification_service.app.services import (
     ConsistencyEngine,
     verify_rule,
 )
@@ -85,7 +84,6 @@ __all__ = [
     "SourceReference",
     # Rules
     "DecisionEngine",
-    "DecisionResult",
     "Rule",
     "RuleLoader",
     "TraceStep",

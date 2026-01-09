@@ -9,15 +9,15 @@ This module tests the RWA rule pack including:
 import pytest
 from pathlib import Path
 
-from backend.ontology import Scenario
-from backend.rules import RuleLoader, DecisionEngine
+from backend.core.ontology import Scenario
+from backend.rule_service.app.services import RuleLoader, DecisionEngine
 
 
 @pytest.fixture
 def rule_loader():
     """Create a rule loader with RWA rules loaded."""
     loader = RuleLoader()
-    rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+    rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
     loader.load_directory(rules_dir)
     return loader
 

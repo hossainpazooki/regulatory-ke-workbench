@@ -22,19 +22,19 @@ import streamlit as st
 import pandas as pd
 
 # Backend imports
-from backend.rules import RuleLoader, Rule, DecisionEngine
-from backend.rules.schema import DecisionBranch, DecisionLeaf
-from backend.verify import ConsistencyEngine
-from backend.analytics import ErrorPatternAnalyzer, DriftDetector
-from backend.ontology import Scenario
-from backend.visualization import (
+from backend.rule_service.app.services import RuleLoader, Rule, DecisionEngine
+from backend.rule_service.app.services.schema import DecisionBranch, DecisionLeaf
+from backend.verification_service.app.services import ConsistencyEngine
+from backend.analytics_service.app.services import ErrorPatternAnalyzer, DriftDetector
+from backend.core.ontology import Scenario
+from backend.core.visualization import (
     TreeAdapter,
     TreeGraph,
     TreeNode,
     rule_to_graph,
     extract_trace_path,
 )
-from backend.rag.frontend_helpers import (
+from backend.rag_service.app.services.frontend_helpers import (
     get_rule_context,
     get_related_provisions,
     search_corpus,
@@ -175,7 +175,7 @@ def initialize_rag() -> list[str]:
     if rule_ids:
         get_rule_context(rule_ids[0])
 
-    from backend.rag import frontend_helpers
+    from backend.rag_service.app.services import frontend_helpers
     if frontend_helpers._context_retriever:
         return list(frontend_helpers._context_retriever.indexed_documents)
     return []

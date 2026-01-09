@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import pytest
 
-from backend.jurisdiction.resolver import resolve_jurisdictions, get_equivalences
-from backend.jurisdiction.evaluator import evaluate_jurisdiction_sync
-from backend.jurisdiction.conflicts import detect_conflicts, check_timeline_conflicts
-from backend.jurisdiction.pathway import (
+from backend.rule_service.app.services.jurisdiction.resolver import resolve_jurisdictions, get_equivalences
+from backend.rule_service.app.services.jurisdiction.evaluator import evaluate_jurisdiction_sync
+from backend.rule_service.app.services.jurisdiction.conflicts import detect_conflicts, check_timeline_conflicts
+from backend.rule_service.app.services.jurisdiction.pathway import (
     synthesize_pathway,
     aggregate_obligations,
     estimate_timeline,
     get_critical_path,
 )
-from backend.ontology.jurisdiction import JurisdictionCode, JurisdictionRole
-from backend.persistence.database import init_db_with_seed, set_db_path
+from backend.core.ontology.jurisdiction import JurisdictionCode, JurisdictionRole
+from backend.database_service.app.services.database import init_db_with_seed, set_db_path
 import tempfile
 
 

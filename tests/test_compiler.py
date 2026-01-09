@@ -7,16 +7,16 @@ Tests IR generation, rule compilation, premise indexing, and optimization.
 import pytest
 from pathlib import Path
 
-from backend.compiler.ir import (
+from backend.database_service.app.services.compiler.ir import (
     CompiledCheck,
     DecisionEntry,
     ObligationSpec,
     RuleIR,
 )
-from backend.compiler.compiler import RuleCompiler, compile_rule, compile_rules
-from backend.compiler.premise_index import PremiseIndexBuilder, get_premise_index, reset_premise_index
-from backend.compiler.optimizer import RuleOptimizer, optimize_rule
-from backend.rules.loader import (
+from backend.database_service.app.services.compiler.compiler import RuleCompiler, compile_rule, compile_rules
+from backend.database_service.app.services.compiler.premise_index import PremiseIndexBuilder, get_premise_index, reset_premise_index
+from backend.database_service.app.services.compiler.optimizer import RuleOptimizer, optimize_rule
+from backend.rule_service.app.services.loader import (
     RuleLoader,
     Rule,
     ConditionGroupSpec,
@@ -258,7 +258,7 @@ class TestRuleCompiler:
 
     def test_compile_real_yaml_rules(self):
         """Test compiling actual YAML rules from the project."""
-        rules_dir = Path(__file__).parent.parent / "backend" / "rules"
+        rules_dir = Path(__file__).parent.parent / "backend" / "rule_service" / "data"
         loader = RuleLoader()
         rules = loader.load_directory(rules_dir)
 

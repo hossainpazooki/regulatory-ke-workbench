@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.rules.schema import Rule, ConsistencyBlock
+    from backend.rule_service.app.services.schema import Rule, ConsistencyBlock
 
 
 # =============================================================================
@@ -94,7 +94,7 @@ def get_priority_score(
     Returns:
         Priority score from 0.0 to 1.0
     """
-    from backend.rules.schema import ConsistencyStatus
+    from backend.rule_service.app.services.schema import ConsistencyStatus
 
     if rule.rule_id not in verification_results:
         return 0.5  # Unverified rules have medium priority
@@ -176,7 +176,7 @@ def submit_review(
     Returns:
         True if review was submitted successfully
     """
-    from backend.rules.schema import (
+    from backend.rule_service.app.services.schema import (
         ConsistencyBlock,
         ConsistencySummary,
         ConsistencyEvidence,

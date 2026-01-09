@@ -3,7 +3,7 @@
 import pytest
 from datetime import date
 
-from backend.ontology import (
+from backend.core.ontology import (
     Actor,
     ActorType,
     Instrument,

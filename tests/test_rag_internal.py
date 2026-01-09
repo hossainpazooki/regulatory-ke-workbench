@@ -6,7 +6,7 @@ import pytest
 from datetime import date
 from pathlib import Path
 
-from backend.rules.loader import (
+from backend.rule_service.app.services.loader import (
     Rule,
     RuleLoader,
     SourceRef,
@@ -14,7 +14,7 @@ from backend.rules.loader import (
     ConditionSpec,
     DecisionLeaf,
 )
-from backend.rag import RuleContextRetriever, RuleContext
+from backend.rag_service.app.services import RuleContextRetriever, RuleContext
 
 
 # =============================================================================
@@ -369,7 +369,7 @@ class TestConsistencyEngineIntegration:
 
     def test_consistency_engine_with_retriever(self, rule_context_retriever, sample_rule):
         """Test that consistency engine can use retriever for source text."""
-        from backend.verify import ConsistencyEngine
+        from backend.verification_service.app.services import ConsistencyEngine
 
         # Create consistency engine with retriever
         engine = ConsistencyEngine(retriever=rule_context_retriever._retriever)
@@ -387,7 +387,7 @@ class TestConsistencyEngineIntegration:
         assert source_text is not None
 
         # Can now pass to consistency checks
-        from backend.verify.consistency_engine import check_deontic_alignment
+        from backend.verification_service.app.services.consistency_engine import check_deontic_alignment
 
         evidence = check_deontic_alignment(sample_rule, source_text)
         assert evidence.tier == 1

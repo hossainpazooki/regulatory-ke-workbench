@@ -6,8 +6,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pathlib import Path
 
-from backend.rules.loader import Rule, RuleLoader, SourceRef, DecisionLeaf
-from backend.rules.schema import (
+from backend.rule_service.app.services.loader import Rule, RuleLoader, SourceRef, DecisionLeaf
+from backend.rule_service.app.services.schema import (
     ConsistencyBlock,
     ConsistencySummary,
     ConsistencyEvidence,
@@ -23,8 +23,8 @@ from backend.rules.schema import (
 def ke_client(tmp_path: Path):
     """Create test client with KE routes."""
     from fastapi import FastAPI
-    from backend.api import ke_router
-    from backend.api import routes_ke
+    from backend.core.api import ke_router
+    from backend.core.api import routes_ke
 
     # Save original state
     original_rule_loader = routes_ke._rule_loader

@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from backend.rag.corpus_loader import (
+from backend.rag_service.app.services.corpus_loader import (
     LegalDocument,
     LegalCorpusError,
     load_legal_document,

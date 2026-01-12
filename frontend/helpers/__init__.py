@@ -17,8 +17,14 @@ from frontend.helpers.db_integration import (
     get_cache_stats,
     get_index_stats,
 )
+from frontend.helpers.analytics_client import (
+    AnalyticsClient,
+    get_analytics_client,
+    reset_analytics_client,
+)
 
 __all__ = [
+    # Database Integration
     "get_db_state",
     "migrate_rules_to_db",
     "get_database_status",
@@ -34,4 +40,8 @@ __all__ = [
     "get_compilation_status",
     "get_cache_stats",
     "get_index_stats",
+    # Analytics Client
+    "AnalyticsClient",
+    "get_analytics_client",
+    "reset_analytics_client",
 ]

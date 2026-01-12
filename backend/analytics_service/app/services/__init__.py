@@ -11,13 +11,18 @@ from .drift import (
     DriftReport,
     DriftMetrics,
 )
+from .rule_analytics import RuleAnalyticsService
 
 __all__ = [
+    # Error Patterns
     "ErrorPatternAnalyzer",
     "ErrorPattern",
     "CategoryStats",
     "ReviewQueueItem",
+    # Drift Detection
     "DriftDetector",
     "DriftReport",
     "DriftMetrics",
+    # Rule Analytics
+    "RuleAnalyticsService",
 ]

@@ -15,6 +15,7 @@ from backend.core.api import (
     navigate_router,
     decoder_router,
     counterfactual_router,
+    analytics_router,
     embedding_router,
 )
 from backend.database_service.app.services import init_db
@@ -68,6 +69,7 @@ def create_app() -> FastAPI:
     app.include_router(navigate_router)
     app.include_router(decoder_router)
     app.include_router(counterfactual_router)
+    app.include_router(analytics_router)
     app.include_router(embedding_router)
 
     @app.get("/")
@@ -85,6 +87,7 @@ def create_app() -> FastAPI:
                 "navigate": "/navigate - Cross-border compliance navigation",
                 "decoder": "/decoder/* - Tiered explanation decoder",
                 "counterfactual": "/counterfactual/* - What-if analysis",
+                "analytics": "/analytics/* - Rule comparison, clustering, similarity search",
                 "embedding": "/embedding/rules - Embedding rule CRUD",
             },
         }

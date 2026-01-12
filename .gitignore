@@ -72,3 +72,6 @@ test_results/
 
 # Generated files
 repo_tree.txt
+
+# Implementation plan (personal notes)
+docs/IMPLEMENTATION_PLAN.md

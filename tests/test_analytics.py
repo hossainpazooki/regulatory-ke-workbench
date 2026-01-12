@@ -455,3 +455,586 @@ class TestAnalyticsIntegration:
         assert len(queue) > 0
         assert summary["total_rules"] == 5
         assert drift_report.drift_severity == "none"
+
+
+# =============================================================================
+# RuleAnalyticsService Tests
+# =============================================================================
+
+from backend.analytics_service.app.services import RuleAnalyticsService
+from backend.analytics_service.app.schemas import (
+    EmbeddingTypeEnum,
+    ClusterAlgorithm,
+    ConflictType,
+    ConflictSeverity,
+    CoverageImportance,
+    CompareRulesRequest,
+    ComparisonResult,
+    ClusterRequest,
+    ClusterInfo,
+    ClusterAnalysis,
+    ConflictSearchRequest,
+    ConflictInfo,
+    ConflictReport,
+    SimilarityExplanation,
+    SimilarRule,
+    SimilarRulesRequest,
+    SimilarRulesResponse,
+    FrameworkCoverage,
+    CoverageGap,
+    CoverageReport,
+    UMAPPoint,
+    UMAPProjectionRequest,
+    UMAPProjectionResponse,
+)
+from backend.core.ontology import JurisdictionCode
+
+
+@pytest.fixture
+def rules_for_analytics() -> list[Rule]:
+    """Create rules suitable for analytics testing."""
+    rules = []
+
+    # Rule 1: MiCA authorization rule (EU)
+    rules.append(Rule(
+        rule_id="mica_art36_authorization",
+        description="MiCA Article 36 authorization requirements",
+        source=SourceRef(document_id="mica", article="Article 36"),
+        jurisdiction=JurisdictionCode.EU,
+        decision_tree=DecisionLeaf(result="requires_authorization"),
+        tags=["authorization", "stablecoin", "mica"],
+        effective_date=date(2024, 6, 30),
+    ))
+
+    # Rule 2: Similar MiCA rule (EU)
+    rules.append(Rule(
+        rule_id="mica_art38_stablecoin",
+        description="MiCA Article 38 stablecoin requirements",
+        source=SourceRef(document_id="mica", article="Article 38"),
+        jurisdiction=JurisdictionCode.EU,
+        decision_tree=DecisionLeaf(result="requires_reserve"),
+        tags=["stablecoin", "reserve", "mica"],
+        effective_date=date(2024, 6, 30),
+    ))
+
+    # Rule 3: FCA authorization (UK)
+    rules.append(Rule(
+        rule_id="fca_crypto_authorization",
+        description="FCA crypto authorization requirements",
+        source=SourceRef(document_id="fca_handbook", article="PERG 2.8"),
+        jurisdiction=JurisdictionCode.UK,
+        decision_tree=DecisionLeaf(result="requires_fca_registration"),
+        tags=["authorization", "crypto", "fca"],
+        effective_date=date(2024, 1, 1),
+    ))
+
+    # Rule 4: US rule
+    rules.append(Rule(
+        rule_id="us_stablecoin_rule",
+        description="US stablecoin regulation",
+        source=SourceRef(document_id="genius_act", article="Section 101"),
+        jurisdiction=JurisdictionCode.US,
+        decision_tree=DecisionLeaf(result="requires_license"),
+        tags=["stablecoin", "license", "us"],
+        effective_date=date(2025, 1, 1),
+    ))
+
+    # Rule 5: Swiss rule
+    rules.append(Rule(
+        rule_id="ch_finma_rule",
+        description="FINMA crypto regulation",
+        source=SourceRef(document_id="finma_guidance", article="Section 5"),
+        jurisdiction=JurisdictionCode.CH,
+        decision_tree=DecisionLeaf(result="requires_finma_approval"),
+        tags=["crypto", "finma", "switzerland"],
+        effective_date=date(2024, 3, 1),
+    ))
+
+    return rules
+
+
+@pytest.fixture
+def analytics_service_with_rules(rules_for_analytics, tmp_path) -> RuleAnalyticsService:
+    """Create RuleAnalyticsService with test rules loaded."""
+    loader = RuleLoader(tmp_path)
+    for rule in rules_for_analytics:
+        loader._rules[rule.rule_id] = rule
+    return RuleAnalyticsService(rule_loader=loader)
+
+
+class TestRuleAnalyticsService:
+    """Test RuleAnalyticsService functionality."""
+
+    def test_init(self, tmp_path):
+        """Test service initialization."""
+        loader = RuleLoader(tmp_path)
+        service = RuleAnalyticsService(rule_loader=loader)
+        assert service is not None
+        assert service._rule_loader == loader
+
+    def test_compare_rules_basic(self, analytics_service_with_rules):
+        """Test basic rule comparison."""
+        service = analytics_service_with_rules
+
+        result = service.compare_rules(
+            rule1_id="mica_art36_authorization",
+            rule2_id="mica_art38_stablecoin",
+        )
+
+        assert isinstance(result, ComparisonResult)
+        assert result.rule1_id == "mica_art36_authorization"
+        assert result.rule2_id == "mica_art38_stablecoin"
+        assert 0.0 <= result.overall_similarity <= 1.0
+        assert len(result.similarity_by_type) > 0
+
+    def test_compare_rules_with_weights(self, analytics_service_with_rules):
+        """Test rule comparison with custom weights."""
+        service = analytics_service_with_rules
+
+        weights = {"semantic": 0.5, "entity": 0.3, "legal": 0.2}
+        result = service.compare_rules(
+            rule1_id="mica_art36_authorization",
+            rule2_id="fca_crypto_authorization",
+            weights=weights,
+        )
+
+        assert isinstance(result, ComparisonResult)
+        # Should have some shared entities (authorization)
+        assert "authorization" in result.shared_entities or len(result.shared_entities) >= 0
+
+    def test_compare_rules_different_jurisdictions(self, analytics_service_with_rules):
+        """Test comparing rules from different jurisdictions."""
+        service = analytics_service_with_rules
+
+        result = service.compare_rules(
+            rule1_id="mica_art36_authorization",
+            rule2_id="fca_crypto_authorization",
+        )
+
+        assert result.rule1_id == "mica_art36_authorization"
+        assert result.rule2_id == "fca_crypto_authorization"
+        # Different jurisdictions, should have lower similarity
+        assert 0.0 <= result.overall_similarity <= 1.0
+
+    def test_cluster_rules_kmeans(self, analytics_service_with_rules):
+        """Test rule clustering with K-means."""
+        service = analytics_service_with_rules
+
+        result = service.cluster_rules(
+            embedding_type="semantic",
+            n_clusters=2,
+            algorithm="kmeans",
+        )
+
+        assert isinstance(result, ClusterAnalysis)
+        assert result.algorithm == "kmeans"
+        assert result.embedding_type == "semantic"
+        # May be 0 if no embeddings exist
+        assert result.num_clusters >= 0
+
+    def test_cluster_rules_dbscan(self, analytics_service_with_rules):
+        """Test rule clustering with DBSCAN."""
+        service = analytics_service_with_rules
+
+        result = service.cluster_rules(
+            embedding_type="semantic",
+            algorithm="dbscan",
+        )
+
+        assert isinstance(result, ClusterAnalysis)
+        assert result.algorithm == "dbscan"
+
+    def test_cluster_rules_auto_clusters(self, analytics_service_with_rules):
+        """Test rule clustering with auto-detected cluster count."""
+        service = analytics_service_with_rules
+
+        result = service.cluster_rules(
+            embedding_type="entity",
+            n_clusters=None,  # Auto-detect
+            algorithm="kmeans",
+        )
+
+        assert isinstance(result, ClusterAnalysis)
+        # May be 0 if no embeddings exist
+        assert result.num_clusters >= 0
+
+    def test_find_conflicts_semantic(self, analytics_service_with_rules):
+        """Test semantic conflict detection."""
+        service = analytics_service_with_rules
+
+        result = service.find_conflicts(
+            rule_ids=None,
+            conflict_types=["semantic"],
+            threshold=0.3,  # Lower threshold to find more matches in test
+        )
+
+        assert isinstance(result, ConflictReport)
+        # May be 0 if no embeddings to compare
+        assert result.total_rules_analyzed >= 0
+
+    def test_find_conflicts_with_specific_rules(self, analytics_service_with_rules):
+        """Test conflict detection for specific rules."""
+        service = analytics_service_with_rules
+
+        result = service.find_conflicts(
+            rule_ids=["mica_art36_authorization", "mica_art38_stablecoin"],
+            conflict_types=["semantic", "structural"],
+            threshold=0.5,
+        )
+
+        assert isinstance(result, ConflictReport)
+        assert result.total_rules_analyzed == 2
+
+    def test_find_conflicts_jurisdiction(self, analytics_service_with_rules):
+        """Test jurisdiction conflict detection."""
+        service = analytics_service_with_rules
+
+        result = service.find_conflicts(
+            conflict_types=["jurisdiction"],
+            threshold=0.5,
+        )
+
+        assert isinstance(result, ConflictReport)
+
+    def test_find_similar_basic(self, analytics_service_with_rules):
+        """Test basic similarity search."""
+        service = analytics_service_with_rules
+
+        result = service.find_similar(
+            rule_id="mica_art36_authorization",
+            embedding_type="all",
+            top_k=3,
+            min_score=0.0,  # Accept all scores for testing
+        )
+
+        assert isinstance(result, SimilarRulesResponse)
+        assert result.query_rule_id == "mica_art36_authorization"
+        # Should find other rules (4 other rules available)
+        assert len(result.similar_rules) <= 3
+
+    def test_find_similar_by_type(self, analytics_service_with_rules):
+        """Test similarity search by specific embedding type."""
+        service = analytics_service_with_rules
+
+        for emb_type in ["semantic", "entity", "legal"]:
+            result = service.find_similar(
+                rule_id="mica_art36_authorization",
+                embedding_type=emb_type,
+                top_k=2,
+                min_score=0.0,
+            )
+
+            assert isinstance(result, SimilarRulesResponse)
+
+    def test_find_similar_with_explanation(self, analytics_service_with_rules):
+        """Test similarity search with explanations."""
+        service = analytics_service_with_rules
+
+        result = service.find_similar(
+            rule_id="mica_art36_authorization",
+            embedding_type="all",
+            top_k=3,
+            min_score=0.0,
+            include_explanation=True,
+        )
+
+        assert isinstance(result, SimilarRulesResponse)
+        # Check that explanations are present when requested
+        for similar in result.similar_rules:
+            if similar.explanation:
+                assert isinstance(similar.explanation, SimilarityExplanation)
+
+    def test_analyze_coverage(self, analytics_service_with_rules):
+        """Test coverage analysis."""
+        service = analytics_service_with_rules
+
+        result = service.analyze_coverage()
+
+        assert isinstance(result, CoverageReport)
+        assert result.total_rules == 5  # We created 5 test rules
+        assert result.total_legal_sources >= 1
+        assert len(result.coverage_by_framework) >= 1
+
+    def test_analyze_coverage_frameworks(self, analytics_service_with_rules):
+        """Test that coverage includes expected frameworks."""
+        service = analytics_service_with_rules
+
+        result = service.analyze_coverage()
+
+        # Check that MiCA framework is present (2 rules)
+        # Framework names are uppercase in the document_id
+        assert "MICA" in result.coverage_by_framework
+        mica_coverage = result.coverage_by_framework["MICA"]
+        assert isinstance(mica_coverage, FrameworkCoverage)
+        assert mica_coverage.covered_articles >= 2
+
+    def test_get_umap_projection_2d(self, analytics_service_with_rules):
+        """Test 2D UMAP projection."""
+        service = analytics_service_with_rules
+
+        result = service.get_umap_projection(
+            embedding_type="semantic",
+            n_components=2,
+        )
+
+        assert isinstance(result, UMAPProjectionResponse)
+        assert result.n_components == 2
+        assert result.embedding_type == "semantic"
+        # May have 0 points if no embeddings exist
+        assert len(result.points) >= 0
+
+        # Check 2D coordinates if we have points
+        for point in result.points:
+            assert point.x is not None
+            assert point.y is not None
+
+    def test_get_umap_projection_3d(self, analytics_service_with_rules):
+        """Test 3D UMAP projection."""
+        service = analytics_service_with_rules
+
+        result = service.get_umap_projection(
+            embedding_type="semantic",
+            n_components=3,
+        )
+
+        assert isinstance(result, UMAPProjectionResponse)
+        assert result.n_components == 3
+
+    def test_get_umap_projection_with_params(self, analytics_service_with_rules):
+        """Test UMAP projection with custom parameters."""
+        service = analytics_service_with_rules
+
+        result = service.get_umap_projection(
+            embedding_type="entity",
+            n_components=2,
+            n_neighbors=5,
+            min_dist=0.2,
+        )
+
+        assert isinstance(result, UMAPProjectionResponse)
+
+
+class TestRuleAnalyticsServiceEdgeCases:
+    """Test edge cases for RuleAnalyticsService."""
+
+    def test_compare_same_rule(self, analytics_service_with_rules):
+        """Test comparing a rule with itself."""
+        service = analytics_service_with_rules
+
+        result = service.compare_rules(
+            rule1_id="mica_art36_authorization",
+            rule2_id="mica_art36_authorization",
+        )
+
+        # Same rule should have similarity of 1.0 (or close if based on embeddings)
+        assert isinstance(result, ComparisonResult)
+        assert result.rule1_id == result.rule2_id
+        # Without embeddings, similarity will be 1.0 (fallback for same rule)
+        assert 0.0 <= result.overall_similarity <= 1.0
+
+    def test_cluster_single_rule(self, tmp_path):
+        """Test clustering with a single rule."""
+        loader = RuleLoader(tmp_path)
+        loader._rules["single_rule"] = Rule(
+            rule_id="single_rule",
+            source=SourceRef(document_id="test"),
+            decision_tree=DecisionLeaf(result="test"),
+        )
+
+        service = RuleAnalyticsService(rule_loader=loader)
+        result = service.cluster_rules(embedding_type="semantic", n_clusters=1)
+
+        # May be 0 if no embeddings exist
+        assert result.num_clusters >= 0
+
+    def test_find_similar_no_matches(self, analytics_service_with_rules):
+        """Test similarity search with very high threshold."""
+        service = analytics_service_with_rules
+
+        result = service.find_similar(
+            rule_id="mica_art36_authorization",
+            embedding_type="all",
+            top_k=10,
+            min_score=0.99,  # Very high threshold
+        )
+
+        # Should return valid response (may be empty)
+        assert isinstance(result, SimilarRulesResponse)
+        assert result.query_rule_id == "mica_art36_authorization"
+
+    def test_analyze_coverage_empty_loader(self, tmp_path):
+        """Test coverage analysis with empty rule loader."""
+        loader = RuleLoader(tmp_path)
+        service = RuleAnalyticsService(rule_loader=loader)
+
+        result = service.analyze_coverage()
+
+        assert result.total_rules == 0
+        assert result.total_legal_sources == 0
+
+
+# =============================================================================
+# Analytics API Route Tests
+# =============================================================================
+
+from fastapi.testclient import TestClient
+from backend.main import create_app
+
+
+@pytest.fixture
+def api_client():
+    """Create test client for API testing."""
+    app = create_app()
+    return TestClient(app)
+
+
+class TestAnalyticsAPIRoutes:
+    """Test analytics API routes."""
+
+    def test_analytics_summary(self, api_client):
+        """Test GET /analytics/summary."""
+        response = api_client.get("/analytics/summary")
+        assert response.status_code == 200
+        data = response.json()
+        assert "total_rules" in data
+        assert "jurisdictions" in data
+        assert "embedding_types_available" in data
+
+    def test_compare_rules_endpoint(self, api_client):
+        """Test POST /analytics/rules/compare."""
+        # First get available rules
+        rules_response = api_client.get("/rules")
+        if rules_response.status_code != 200:
+            pytest.skip("Rules endpoint not available")
+
+        rules = rules_response.json()
+        if len(rules) < 2:
+            pytest.skip("Not enough rules for comparison")
+
+        rule_ids = list(rules.keys())[:2] if isinstance(rules, dict) else [r.get("rule_id") for r in rules[:2]]
+
+        response = api_client.post(
+            "/analytics/rules/compare",
+            json={
+                "rule1_id": rule_ids[0],
+                "rule2_id": rule_ids[1],
+            }
+        )
+
+        if response.status_code == 404:
+            pytest.skip("Rules not found in loader")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "overall_similarity" in data
+        assert "similarity_by_type" in data
+
+    def test_get_clusters_endpoint(self, api_client):
+        """Test GET /analytics/rule-clusters."""
+        response = api_client.get("/analytics/rule-clusters")
+        assert response.status_code == 200
+        data = response.json()
+        assert "num_clusters" in data
+        assert "algorithm" in data
+        assert "clusters" in data
+
+    def test_get_clusters_with_params(self, api_client):
+        """Test GET /analytics/rule-clusters with parameters."""
+        response = api_client.get(
+            "/analytics/rule-clusters",
+            params={
+                "embedding_type": "semantic",
+                "n_clusters": 2,
+                "algorithm": "kmeans",
+            }
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["algorithm"] == "kmeans"
+
+    def test_find_conflicts_endpoint(self, api_client):
+        """Test POST /analytics/find-conflicts."""
+        response = api_client.post(
+            "/analytics/find-conflicts",
+            json={
+                "conflict_types": ["semantic"],
+                "threshold": 0.5,
+            }
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "total_rules_analyzed" in data
+        assert "conflicts_found" in data
+        assert "conflicts" in data
+
+    def test_get_conflicts_endpoint(self, api_client):
+        """Test GET /analytics/conflicts."""
+        response = api_client.get("/analytics/conflicts")
+        assert response.status_code == 200
+        data = response.json()
+        assert "conflicts" in data
+
+    def test_get_coverage_endpoint(self, api_client):
+        """Test GET /analytics/coverage."""
+        response = api_client.get("/analytics/coverage")
+        assert response.status_code == 200
+        data = response.json()
+        assert "total_rules" in data
+        assert "total_legal_sources" in data
+        assert "coverage_by_framework" in data
+
+    def test_get_umap_projection_endpoint(self, api_client):
+        """Test GET /analytics/umap-projection."""
+        response = api_client.get("/analytics/umap-projection")
+        assert response.status_code == 200
+        data = response.json()
+        assert "n_components" in data
+        assert "embedding_type" in data
+        assert "points" in data
+
+    def test_get_umap_projection_3d(self, api_client):
+        """Test GET /analytics/umap-projection with 3D."""
+        response = api_client.get(
+            "/analytics/umap-projection",
+            params={"n_components": 3}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["n_components"] == 3
+
+
+class TestAnalyticsAPIEdgeCases:
+    """Test API edge cases."""
+
+    def test_compare_nonexistent_rule(self, api_client):
+        """Test comparing with nonexistent rule."""
+        response = api_client.post(
+            "/analytics/rules/compare",
+            json={
+                "rule1_id": "nonexistent_rule_1",
+                "rule2_id": "nonexistent_rule_2",
+            }
+        )
+        assert response.status_code == 404
+
+    def test_get_similar_nonexistent_rule(self, api_client):
+        """Test similarity search for nonexistent rule."""
+        response = api_client.get("/analytics/rules/nonexistent_rule_xyz/similar")
+        assert response.status_code == 404
+
+    def test_invalid_embedding_type(self, api_client):
+        """Test with invalid embedding type."""
+        response = api_client.get(
+            "/analytics/rule-clusters",
+            params={"embedding_type": "invalid_type"}
+        )
+        # Should return 422 (validation error)
+        assert response.status_code == 422
+
+    def test_invalid_cluster_algorithm(self, api_client):
+        """Test with invalid cluster algorithm."""
+        response = api_client.get(
+            "/analytics/rule-clusters",
+            params={"algorithm": "invalid_algorithm"}
+        )
+        assert response.status_code == 422

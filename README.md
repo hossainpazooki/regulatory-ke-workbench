@@ -193,49 +193,90 @@ BM25 ~~~ DEC
 
 ```
 backend/
-├── core/                    # Shared infrastructure
-│   ├── config.py            # Settings & feature flags
-│   ├── database.py          # SQLModel ORM utilities
-│   ├── ontology/            # Domain types (Actor, Instrument, Provision)
-│   ├── visualization/       # Tree rendering (Graphviz, Mermaid)
-│   └── api/                 # FastAPI routers
+├── core/                        # Shared infrastructure
+│   ├── config.py                # Settings & feature flags
+│   ├── database.py              # SQLModel ORM utilities
+│   ├── models.py                # SQLModel entities (RuleRecord, VersionRecord, etc.)
+│   ├── ontology/                # Domain types (Actor, Instrument, Provision)
+│   ├── visualization/           # Tree rendering (Graphviz, Mermaid)
+│   └── api/                     # FastAPI routers
+│       ├── routes_decide.py     # /decide endpoint
+│       ├── routes_decoder.py    # /decoder endpoint (explanations)
+│       ├── routes_counterfactual.py  # /counterfactual endpoint
+│       ├── routes_analytics.py  # /analytics endpoint
+│       ├── routes_navigate.py   # Cross-border navigation
+│       └── routes_ke.py         # KE workbench endpoints
 │
-├── rule_service/            # Rule management & evaluation
-│   ├── data/                # YAML rule packs (MiCA, FCA, GENIUS)
+├── rule_service/                # Rule management & evaluation
+│   ├── data/                    # YAML rule packs (MiCA, FCA, GENIUS)
 │   └── app/services/
-│       ├── loader.py        # YAML parsing
-│       ├── engine.py        # Decision engine
-│       └── jurisdiction/    # Multi-jurisdiction (resolver, evaluator, conflicts)
+│       ├── loader.py            # YAML parsing
+│       ├── engine.py            # Decision engine with tracing
+│       └── jurisdiction/        # Multi-jurisdiction support
+│           ├── resolver.py      # Jurisdiction resolution
+│           ├── evaluator.py     # Per-jurisdiction evaluation
+│           ├── conflicts.py     # Cross-border conflict detection
+│           └── pathway.py       # Compliance pathway synthesis
 │
-├── database_service/        # Persistence & compilation
+├── decoder_service/             # ML-powered explanation layer
 │   └── app/services/
-│       ├── compiler/        # YAML → IR compilation
-│       └── runtime/         # IR cache & execution
+│       ├── schemas.py           # ExplanationTier, ScenarioType, Citation
+│       ├── decoder.py           # DecoderService (tiered explanations)
+│       ├── counterfactual.py    # CounterfactualEngine (what-if analysis)
+│       ├── citations.py         # CitationInjector (legal references)
+│       ├── templates.py         # TemplateRegistry (explanation templates)
+│       └── delta.py             # DeltaAnalyzer (baseline vs counterfactual)
 │
-├── verification_service/    # Semantic consistency
-│   └── app/services/        # Tier 0-4 consistency checks
+├── database_service/            # Persistence & compilation
+│   └── app/services/
+│       ├── retrieval_engine/
+│       │   ├── compiler/        # YAML → IR compilation
+│       │   └── runtime/         # IR cache & execution
+│       ├── temporal_engine/     # Event sourcing & versioning
+│       │   ├── version_repo.py  # Rule version history
+│       │   └── event_repo.py    # Audit trail events
+│       └── stores/              # Embedding & graph storage
+│           ├── embedding_store.py  # Vector storage (5 types)
+│           ├── graph_store.py      # Relationship graph
+│           └── schemas.py          # Store data models
 │
-├── analytics_service/       # Error patterns & drift
-│   └── app/services/        # Pattern analysis, drift detection
+├── verification_service/        # Semantic consistency
+│   └── app/services/            # Tier 0-4 consistency checks
 │
-├── rag_service/             # Retrieval-augmented context
-│   └── app/services/        # BM25 index, context helpers
+├── analytics_service/           # Error patterns & drift
+│   └── app/services/
+│       ├── error_patterns.py    # Pattern analysis
+│       ├── drift.py             # Drift detection
+│       └── rule_analytics.py    # Clustering & similarity
 │
-└── rule_embedding_service/  # Vector embeddings & similarity search
+├── rag_service/                 # Retrieval-augmented context
+│   └── app/services/            # BM25 index, context helpers
+│
+└── rule_embedding_service/      # Vector embeddings & graph
     └── app/services/
-        ├── models.py        # RuleEmbedding, EmbeddingType
-        ├── generator.py     # 4-type embedding generation
-        └── service.py       # CRUD + vector search
+        ├── embedding_service.py # 4-type embedding generation
+        └── graph.py             # Node2Vec graph embeddings
 
 frontend/
-├── Home.py                  # Landing page
-└── pages/
-    ├── 1_KE_Workbench.py    # Rule verification & review
-    ├── 2_Production_Demo.py # IR compilation & benchmarks
-    └── 3_Navigator.py       # Cross-border compliance
+├── Home.py                      # Landing page
+├── pages/
+│   ├── 1_KE_Workbench.py        # Rule verification & review
+│   ├── 2_Production_Demo.py     # IR compilation & benchmarks
+│   ├── 3_Navigator.py           # Cross-border compliance
+│   ├── 4_Embedding_Explorer.py  # UMAP visualization
+│   ├── 5_Similarity_Search.py   # Multi-type similarity search
+│   ├── 6_Graph_Visualizer.py    # Rule network graphs
+│   └── 7_Analytics_Dashboard.py # Clustering & coverage analysis
+├── ui/                          # Shared UI components
+│   ├── embedding_viz.py         # UMAP rendering
+│   ├── graph_components.py      # Graph visualization
+│   └── similarity_cards.py      # Search result cards
+└── helpers/
+    └── analytics_client.py      # Analytics API client
 
-data/legal/                  # Legal corpus (MiCA, FCA, GENIUS Act)
-docs/                        # Design documentation
+data/legal/                      # Legal corpus (MiCA, FCA, GENIUS Act)
+docs/                            # Design documentation
+tests/                           # Test suite (28 modules)
 ```
 
 ## Regulatory Frameworks

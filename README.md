@@ -1,8 +1,31 @@
 # Regulatory Knowledge Engineering Workbench
 
-A computational law platform for MiCA, RWA tokenization, and stablecoin frameworks. Transforms regulatory documents into executable rules with traceable decision logic.
+An open-source platform for encoding financial regulations as executable logic. Designed for MiCA, stablecoin frameworks, and RWA tokenization—with ML-powered explanations, cross-border compliance navigation, and interactive visualization tools.
 
 **Live Demo:** [pazooki.streamlit.app](https://pazooki.streamlit.app)
+
+## Applied AI Workbench
+
+The Streamlit frontend provides seven interactive tools for exploring and analyzing regulatory rules:
+
+| Page | Capability |
+|------|------------|
+| **KE Workbench** | Browse rules, visualize decision trees, run trace tests, verify consistency |
+| **Production Demo** | Compile rules to IR, benchmark O(1) premise lookup, monitor cache performance |
+| **Navigator** | Cross-border compliance pathways with conflict detection and equivalence mapping |
+| **Embedding Explorer** | UMAP 2D/3D visualization of rule embeddings (semantic, structural, entity, legal) |
+| **Similarity Search** | Find related rules across jurisdictions using multi-type vector similarity |
+| **Graph Visualizer** | Interactive rule relationship graphs with Node2Vec embeddings |
+| **Analytics Dashboard** | Rule clustering, coverage gaps, silhouette scores, and conflict resolution hints |
+
+### Key Features
+
+- **Executable Rules** — YAML-encoded decision trees with traceable legal citations
+- **Multi-Jurisdiction** — EU (MiCA), UK (FCA), US (GENIUS Act), Switzerland, Singapore
+- **Tiered Explanations** — Plain language for users, legal analysis for regulators
+- **What-If Analysis** — Counterfactual engine simulates jurisdiction changes and threshold shifts
+- **Semantic Search** — 4-type embeddings (semantic, structural, entity, legal) for rule discovery
+- **Audit Trail** — Event-sourced versioning with temporal queries
 
 ## Architecture
 

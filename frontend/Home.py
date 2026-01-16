@@ -61,7 +61,7 @@ with nav_col2:
 with nav_col3:
     st.markdown("### Cross-Border Navigator")
     st.caption("Multi-jurisdiction compliance, conflict detection, pathway synthesis")
-    st.page_link("pages/3_Navigator.py", label="Open Navigator", icon="🧭")
+    st.page_link("pages/3_Cross_Border_Navigator.py", label="Open Navigator", icon="🧭")
 
 st.divider()
 

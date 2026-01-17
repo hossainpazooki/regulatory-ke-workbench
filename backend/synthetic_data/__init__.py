@@ -18,6 +18,7 @@ from backend.synthetic_data.config import (
     SCENARIO_CATEGORIES,
     RULE_DISTRIBUTIONS,
     VERIFICATION_TIERS,
+    CONFIDENCE_RANGES,
 )
 from backend.synthetic_data.scenario_generator import ScenarioGenerator
 from backend.synthetic_data.rule_generator import RuleGenerator
@@ -31,6 +32,7 @@ __all__ = [
     "SCENARIO_CATEGORIES",
     "RULE_DISTRIBUTIONS",
     "VERIFICATION_TIERS",
+    "CONFIDENCE_RANGES",
     # Generators
     "ScenarioGenerator",
     "RuleGenerator",

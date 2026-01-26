@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from backend.rule_service.app.services.schema import (
+from backend.rules import (
     Rule,
     DecisionBranch,
     DecisionLeaf,

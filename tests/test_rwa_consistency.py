@@ -7,8 +7,8 @@ works correctly with RWA rules.
 import pytest
 from pathlib import Path
 
-from backend.rule_service.app.services import RuleLoader
-from backend.verification_service.app.services import ConsistencyEngine
+from backend.rules import RuleLoader
+from backend.verification import ConsistencyEngine
 
 
 @pytest.fixture

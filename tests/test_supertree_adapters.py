@@ -7,16 +7,16 @@ without depending on Supertree being installed.
 import pytest
 from pathlib import Path
 
-from backend.rule_service.app.services.schema import (
+from backend.rules import (
     Rule,
     SourceRef,
-    ConditionGroup,
+    ConditionGroupSpec,
     ConditionSpec,
     DecisionBranch,
     DecisionLeaf,
     ObligationSpec,
+    TraceStep,
 )
-from backend.rule_service.app.services.engine import TraceStep
 from backend.core.visualization.supertree_adapters import (
     build_rulebook_outline,
     build_decision_trace_tree,

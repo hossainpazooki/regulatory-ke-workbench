@@ -44,7 +44,7 @@ from .core.ontology import (
 )
 
 # Rules and decision engine
-from .rule_service.app.services import (
+from .rules import (
     DecisionEngine,
     Rule,
     RuleLoader,
@@ -52,7 +52,7 @@ from .rule_service.app.services import (
 )
 
 # Verification engine
-from .verification_service.app.services import (
+from .verification import (
     ConsistencyEngine,
     verify_rule,
 )

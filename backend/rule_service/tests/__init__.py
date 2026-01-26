@@ -1,1 +1,0 @@
-"""Rule service tests."""

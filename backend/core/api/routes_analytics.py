@@ -36,7 +36,7 @@ from backend.analytics_service.app.schemas import (
     UMAPProjectionResponse,
 )
 from backend.analytics_service.app.services import RuleAnalyticsService
-from backend.rule_service.app.services import RuleLoader
+from backend.rules import RuleLoader
 
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])

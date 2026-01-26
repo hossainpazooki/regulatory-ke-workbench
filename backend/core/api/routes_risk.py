@@ -13,7 +13,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from backend.rule_service.app.services.market_risk import (
+from backend.analytics.market_risk import (
     RiskRating,
     CryptoVolatilityMetrics,
     LiquidityMetrics,

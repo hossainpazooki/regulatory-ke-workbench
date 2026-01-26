@@ -4,14 +4,9 @@ import json
 
 from fastapi import APIRouter, HTTPException, Query
 
-from backend.rule_service.app.services import RuleLoader
+from backend.rules import RuleLoader
 from backend.config import get_settings
-from backend.database_service.app.services.temporal_engine.version_repo import (
-    RuleVersionRepository,
-)
-from backend.database_service.app.services.temporal_engine.event_repo import (
-    RuleEventRepository,
-)
+from backend.storage import RuleVersionRepository, RuleEventRepository
 from .models import (
     RulesListResponse,
     RuleInfo,

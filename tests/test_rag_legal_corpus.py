@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.rag_service.app.services import (
+from backend.rag import (
     BM25Index,
     Retriever,
     load_legal_document,

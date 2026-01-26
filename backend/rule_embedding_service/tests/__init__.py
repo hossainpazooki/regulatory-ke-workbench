@@ -1,1 +1,0 @@
-"""Rule embedding service tests."""

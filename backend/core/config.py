@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
 
     # Paths
-    rules_dir: str = "backend/rule_service/data"
+    rules_dir: str = "backend/rules/data"
     data_dir: str = "data"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

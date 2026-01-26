@@ -3,7 +3,7 @@
 import pytest
 from datetime import datetime
 
-from backend.decoder_service.app.services import (
+from backend.decoder import (
     DecoderService,
     CounterfactualEngine,
     CitationInjector,
@@ -518,7 +518,7 @@ class TestCounterfactualEngine:
         )
 
         # Create mock results
-        from backend.decoder_service.app.services import CounterfactualResponse
+        from backend.decoder import CounterfactualResponse
 
         results = [
             CounterfactualResponse(

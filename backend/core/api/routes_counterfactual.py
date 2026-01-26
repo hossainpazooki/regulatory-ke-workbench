@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from backend.decoder_service.app.services import (
+from backend.decoder import (
     CounterfactualEngine,
     CounterfactualResponse,
     ComparisonMatrix,
@@ -13,8 +13,8 @@ from backend.decoder_service.app.services import (
     ScenarioType,
     ExplanationTier,
 )
-from backend.rule_service.app.services import RuleLoader, DecisionEngine
-from backend.config import get_settings
+from backend.rules import RuleLoader, DecisionEngine
+from backend.core.config import get_settings
 
 router = APIRouter(prefix="/counterfactual", tags=["Counterfactual"])
 

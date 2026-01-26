@@ -6,14 +6,14 @@ import pytest
 from pathlib import Path
 from datetime import date
 
-from backend.rule_service.app.services.loader import RuleLoader, Rule
-from backend.rule_service.app.services.schema import (
+from backend.rules import RuleLoader, Rule
+from backend.rules import (
     ConsistencyBlock,
     ConsistencySummary,
     ConsistencyEvidence,
     ConsistencyStatus,
     SourceRef,
-    ConditionGroup,
+    ConditionGroupSpec,
     ConditionSpec,
     DecisionBranch,
     DecisionLeaf,
@@ -121,7 +121,7 @@ class TestRuleWithConsistency:
         )
 
         # Create rule with consistency
-        from backend.rule_service.app.services.loader import (
+        from backend.rules import (
             Rule,
             SourceRef,
             ConditionGroupSpec,
@@ -154,7 +154,7 @@ class TestSourceRefExtensions:
 
     def test_source_ref_with_paragraphs(self):
         """Test SourceRef with paragraph references."""
-        from backend.rule_service.app.services.loader import SourceRef
+        from backend.rules import SourceRef
 
         source = SourceRef(
             document_id="mica_2023",
@@ -212,7 +212,7 @@ class TestRuleSaveLoad:
 
     def test_save_rule_with_consistency(self, tmp_path: Path):
         """Test saving a rule with consistency block to YAML."""
-        from backend.rule_service.app.services.loader import (
+        from backend.rules import (
             Rule,
             RuleLoader,
             SourceRef,

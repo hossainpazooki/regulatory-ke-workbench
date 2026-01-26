@@ -1,1 +1,0 @@
-"""Analytics service application package."""

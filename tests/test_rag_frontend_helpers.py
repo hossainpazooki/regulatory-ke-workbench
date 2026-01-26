@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from backend.rag_service.app.services.frontend_helpers import (
+from backend.rag.frontend_helpers import (
     RuleContextPayload,
     RelatedProvision,
     SearchResult,

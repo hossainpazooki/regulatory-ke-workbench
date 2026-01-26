@@ -8,12 +8,12 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from backend.database_service.app.services.database import (
+from backend.storage.database import (
     init_db,
     set_db_path,
 )
-from backend.database_service.app.services.temporal_engine.version_repo import RuleVersionRepository
-from backend.database_service.app.services.temporal_engine.event_repo import RuleEventRepository
+from backend.storage.temporal.version_repo import RuleVersionRepository
+from backend.storage.temporal.event_repo import RuleEventRepository
 from backend.core.models import RuleEventType
 
 

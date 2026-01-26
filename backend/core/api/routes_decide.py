@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 
 from backend.core.ontology import Scenario
-from backend.rule_service.app.services import RuleLoader, DecisionEngine
+from backend.rules import RuleLoader, DecisionEngine
 from backend.config import get_settings
 from .models import (
     DecideRequest,

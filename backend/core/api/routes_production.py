@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from backend.database_service.app.services import (
+from backend.storage import (
     init_db,
     RuleRepository,
     VerificationRepository,
@@ -21,12 +21,14 @@ from backend.database_service.app.services import (
     sync_rule_to_db,
     load_rules_from_db,
     get_migration_status,
+    RuleCompiler,
+    PremiseIndexBuilder,
+    RuleIR,
+    optimize_rule,
+    RuleRuntime,
+    IRCache,
+    DecisionResult,
 )
-from backend.database_service.app.services.retrieval_engine.compiler import RuleCompiler, PremiseIndexBuilder
-from backend.database_service.app.services.retrieval_engine.compiler.ir import RuleIR
-from backend.database_service.app.services.retrieval_engine.compiler.optimizer import optimize_rule
-from backend.database_service.app.services.retrieval_engine.runtime import RuleRuntime, IRCache
-from backend.database_service.app.services.retrieval_engine.runtime.trace import DecisionResult
 
 from pathlib import Path
 

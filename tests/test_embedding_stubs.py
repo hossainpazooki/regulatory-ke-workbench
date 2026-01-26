@@ -133,7 +133,7 @@ class TestGraphEmbeddingService:
 
     def test_service_class_exists(self):
         """Verify GraphEmbeddingService class is defined."""
-        from backend.rule_embedding_service.app.services.graph import GraphEmbeddingService
+        from backend.embeddings.graph import GraphEmbeddingService
 
         service = GraphEmbeddingService()
         assert service is not None
@@ -142,8 +142,8 @@ class TestGraphEmbeddingService:
         """Verify rule_to_graph converts rule to NetworkX graph."""
         pytest.importorskip("networkx")
         pytest.importorskip("numpy")
-        from backend.rule_embedding_service.app.services.graph import GraphEmbeddingService
-        from backend.rule_embedding_service.app.services.models import (
+        from backend.embeddings.graph import GraphEmbeddingService
+        from backend.embeddings.models import (
             EmbeddingRule,
             EmbeddingCondition,
             EmbeddingDecision,
@@ -187,7 +187,7 @@ class TestGraphEmbeddingService:
         """Verify generate_graph_embedding produces embedding vector."""
         nx = pytest.importorskip("networkx")
         pytest.importorskip("numpy")
-        from backend.rule_embedding_service.app.services.graph import GraphEmbeddingService
+        from backend.embeddings.graph import GraphEmbeddingService
 
         service = GraphEmbeddingService()
 
@@ -206,7 +206,7 @@ class TestGraphEmbeddingService:
 
     def test_find_similar_by_structure_requires_session(self):
         """Verify find_similar_by_structure requires database session."""
-        from backend.rule_embedding_service.app.services.graph import GraphEmbeddingService
+        from backend.embeddings.graph import GraphEmbeddingService
 
         service = GraphEmbeddingService()
         with pytest.raises(ValueError, match="Session required"):
@@ -214,7 +214,7 @@ class TestGraphEmbeddingService:
 
     def test_compare_graphs_requires_session(self):
         """Verify compare_graphs requires database session."""
-        from backend.rule_embedding_service.app.services.graph import GraphEmbeddingService
+        from backend.embeddings.graph import GraphEmbeddingService
 
         service = GraphEmbeddingService()
         with pytest.raises(ValueError, match="Session required"):
@@ -226,14 +226,14 @@ class TestGraphEmbeddingModel:
 
     def test_graph_embedding_model_exists(self):
         """Verify GraphEmbedding model is defined."""
-        from backend.rule_embedding_service.app.services.models import GraphEmbedding
+        from backend.embeddings.models import GraphEmbedding
 
         assert GraphEmbedding is not None
         assert GraphEmbedding.__tablename__ == "graph_embeddings"
 
     def test_graph_embedding_has_required_fields(self):
         """Verify GraphEmbedding has all required fields."""
-        from backend.rule_embedding_service.app.services.models import GraphEmbedding
+        from backend.embeddings.models import GraphEmbedding
         from sqlmodel import Field
 
         # Check key fields exist
@@ -254,7 +254,7 @@ class TestGraphEmbeddingModel:
 
     def test_embedding_rule_has_graph_embeddings_relationship(self):
         """Verify EmbeddingRule has graph_embeddings relationship."""
-        from backend.rule_embedding_service.app.services.models import EmbeddingRule
+        from backend.embeddings.models import EmbeddingRule
 
         # SQLModel relationships are stored in __sqlmodel_relationships__, not model_fields
         assert hasattr(EmbeddingRule, "graph_embeddings")
@@ -265,7 +265,7 @@ class TestSearchSchemas:
 
     def test_text_search_request_schema(self):
         """Verify TextSearchRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import TextSearchRequest
+        from backend.embeddings.schemas import TextSearchRequest
 
         request = TextSearchRequest(query="test query", top_k=5)
         assert request.query == "test query"
@@ -274,7 +274,7 @@ class TestSearchSchemas:
 
     def test_entity_search_request_schema(self):
         """Verify EntitySearchRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import EntitySearchRequest
+        from backend.embeddings.schemas import EntitySearchRequest
 
         request = EntitySearchRequest(entities=["income", "age"])
         assert request.entities == ["income", "age"]
@@ -282,14 +282,14 @@ class TestSearchSchemas:
 
     def test_outcome_search_request_schema(self):
         """Verify OutcomeSearchRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import OutcomeSearchRequest
+        from backend.embeddings.schemas import OutcomeSearchRequest
 
         request = OutcomeSearchRequest(outcome="approved")
         assert request.outcome == "approved"
 
     def test_legal_source_search_request_schema(self):
         """Verify LegalSourceSearchRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import LegalSourceSearchRequest
+        from backend.embeddings.schemas import LegalSourceSearchRequest
 
         request = LegalSourceSearchRequest(
             citation="MiCA Article 36",
@@ -300,7 +300,7 @@ class TestSearchSchemas:
 
     def test_hybrid_search_request_schema(self):
         """Verify HybridSearchRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import HybridSearchRequest
+        from backend.embeddings.schemas import HybridSearchRequest
 
         request = HybridSearchRequest(
             query="income eligibility",
@@ -315,7 +315,7 @@ class TestGraphSchemas:
 
     def test_graph_search_request_schema(self):
         """Verify GraphSearchRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import GraphSearchRequest
+        from backend.embeddings.schemas import GraphSearchRequest
 
         request = GraphSearchRequest(rule_id="test_rule", top_k=5)
         assert request.rule_id == "test_rule"
@@ -323,7 +323,7 @@ class TestGraphSchemas:
 
     def test_graph_comparison_request_schema(self):
         """Verify GraphComparisonRequest schema."""
-        from backend.rule_embedding_service.app.services.schemas import GraphComparisonRequest
+        from backend.embeddings.schemas import GraphComparisonRequest
 
         request = GraphComparisonRequest(rule_id_a="rule_a", rule_id_b="rule_b")
         assert request.rule_id_a == "rule_a"
@@ -331,7 +331,7 @@ class TestGraphSchemas:
 
     def test_rule_graph_schema(self):
         """Verify RuleGraph schema."""
-        from backend.rule_embedding_service.app.services.schemas import (
+        from backend.embeddings.schemas import (
             RuleGraph,
             GraphNode,
             GraphEdge,
@@ -350,7 +350,7 @@ class TestGraphSchemas:
 
     def test_graph_comparison_result_schema(self):
         """Verify GraphComparisonResult schema."""
-        from backend.rule_embedding_service.app.services.schemas import GraphComparisonResult
+        from backend.embeddings.schemas import GraphComparisonResult
 
         result = GraphComparisonResult(
             rule_id_a="a",

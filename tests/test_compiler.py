@@ -7,16 +7,16 @@ Tests IR generation, rule compilation, premise indexing, and optimization.
 import pytest
 from pathlib import Path
 
-from backend.database_service.app.services.retrieval_engine.compiler.ir import (
+from backend.storage.retrieval.compiler.ir import (
     CompiledCheck,
     DecisionEntry,
     ObligationSpec,
     RuleIR,
 )
-from backend.database_service.app.services.retrieval_engine.compiler.compiler import RuleCompiler, compile_rule, compile_rules
-from backend.database_service.app.services.retrieval_engine.compiler.premise_index import PremiseIndexBuilder, get_premise_index, reset_premise_index
-from backend.database_service.app.services.retrieval_engine.compiler.optimizer import RuleOptimizer, optimize_rule
-from backend.rule_service.app.services.loader import (
+from backend.storage.retrieval.compiler.compiler import RuleCompiler, compile_rule, compile_rules
+from backend.storage.retrieval.compiler.premise_index import PremiseIndexBuilder, get_premise_index, reset_premise_index
+from backend.storage.retrieval.compiler.optimizer import RuleOptimizer, optimize_rule
+from backend.rules import (
     RuleLoader,
     Rule,
     ConditionGroupSpec,

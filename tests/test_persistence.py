@@ -8,23 +8,23 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from backend.database_service.app.services.database import (
+from backend.storage.database import (
     init_db,
     get_db,
     set_db_path,
     get_table_stats,
     reset_db,
 )
-from backend.database_service.app.services.repositories.rule_repo import RuleRepository
-from backend.database_service.app.services.repositories.verification_repo import VerificationRepository
-from backend.database_service.app.services.migration import (
+from backend.storage.repositories.rule_repo import RuleRepository
+from backend.storage.repositories.verification_repo import VerificationRepository
+from backend.storage.migration import (
     migrate_yaml_rules,
     extract_premise_keys,
     load_rules_from_db,
     sync_rule_to_db,
     get_migration_status,
 )
-from backend.rule_service.app.services.loader import RuleLoader, ConditionGroupSpec, ConditionSpec
+from backend.rules import RuleLoader, ConditionGroupSpec, ConditionSpec
 
 
 @pytest.fixture(autouse=True)

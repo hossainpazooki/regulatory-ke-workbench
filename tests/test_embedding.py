@@ -7,7 +7,7 @@ from sqlmodel.pool import StaticPool
 
 from backend.main import app
 from backend.core.database import get_session
-from backend.rule_embedding_service.app.services.models import (
+from backend.embeddings.models import (
     EmbeddingRule,
     EmbeddingCondition,
     EmbeddingDecision,

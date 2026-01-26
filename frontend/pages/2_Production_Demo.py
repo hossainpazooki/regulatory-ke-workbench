@@ -23,15 +23,15 @@ import streamlit as st
 import pandas as pd
 
 # Backend imports - Rule service
-from backend.rule_service.app.services import RuleLoader, DecisionEngine
+from backend.rules import RuleLoader, DecisionEngine
 
 # Backend imports - Compiler/Runtime
-from backend.database_service.app.services.retrieval_engine.compiler import (
+from backend.storage.retrieval.compiler import (
     RuleCompiler,
     PremiseIndexBuilder,
     RuleIR,
 )
-from backend.database_service.app.services.retrieval_engine.runtime import (
+from backend.storage.retrieval.runtime import (
     RuleRuntime,
     IRCache,
     get_ir_cache,

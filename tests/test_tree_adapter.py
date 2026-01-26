@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.rule_service.app.services.schema import (
+from backend.rules import (
     Rule,
     DecisionBranch,
     DecisionLeaf,

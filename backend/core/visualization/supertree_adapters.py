@@ -13,8 +13,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from backend.rule_service.app.services.schema import Rule, DecisionBranch, DecisionLeaf
-    from backend.rule_service.app.services.engine import TraceStep
+    from backend.rules import Rule, DecisionBranch, DecisionLeaf, TraceStep
 
 
 def build_rulebook_outline(rules: list[Rule]) -> dict:
@@ -34,7 +33,7 @@ def build_rulebook_outline(rules: list[Rule]) -> dict:
     # Try to load legal corpus for rich document info
     legal_docs = []
     try:
-        from backend.rag_service.app.services.corpus_loader import load_all_legal_documents
+        from backend.rag import load_all_legal_documents
         legal_docs = list(load_all_legal_documents())
     except Exception:
         pass
@@ -319,7 +318,7 @@ def build_corpus_rule_links(rules: list[Rule]) -> dict:
     # Try to load legal corpus metadata
     legal_docs_metadata: dict[str, dict] = {}
     try:
-        from backend.rag_service.app.services.corpus_loader import load_all_legal_documents
+        from backend.rag import load_all_legal_documents
         for doc in load_all_legal_documents():
             legal_docs_metadata[doc.document_id] = {
                 "document_title": doc.title,
@@ -429,7 +428,7 @@ def build_legal_corpus_coverage(rules: list[Rule]) -> dict:
     # Try to load legal corpus
     legal_docs = []
     try:
-        from backend.rag_service.app.services.corpus_loader import load_all_legal_documents
+        from backend.rag import load_all_legal_documents
         legal_docs = list(load_all_legal_documents())
     except Exception:
         pass
@@ -555,8 +554,10 @@ def build_decision_tree_structure(node) -> dict | None:
         return None
 
     # Import here to avoid circular dependencies
-    from backend.rule_service.app.services.schema import DecisionLeaf as SchemaLeaf, DecisionBranch
-    from backend.rule_service.app.services.loader import DecisionLeaf as LoaderLeaf, DecisionNode
+    from backend.rules import DecisionLeaf, DecisionBranch, DecisionNode
+    # Both SchemaLeaf and LoaderLeaf are now unified as DecisionLeaf
+    SchemaLeaf = DecisionLeaf
+    LoaderLeaf = DecisionLeaf
 
     # Handle leaf nodes (both schema and loader types)
     if isinstance(node, (SchemaLeaf, LoaderLeaf)) or hasattr(node, "result") and not hasattr(node, "node_id"):

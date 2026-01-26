@@ -7,20 +7,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import get_settings
-from backend.core.api import (
-    qa_router,
-    decide_router,
-    rules_router,
-    ke_router,
-    production_router,
-    navigate_router,
-    decoder_router,
-    counterfactual_router,
-    analytics_router,
-    risk_router,
-    embedding_router,
-)
-from backend.database_service.app.services import init_db
+from backend.storage import init_db
+
+# Import routers from new domain structure
+from backend.rag import router as rag_router
+from backend.rules import decide_router, rules_router
+from backend.ke import router as ke_router
+from backend.production import router as production_router
+from backend.jurisdiction import router as jurisdiction_router
+from backend.decoder import router as decoder_router
+from backend.analytics import router as analytics_router
+from backend.market_risk import router as market_risk_router
+from backend.embeddings import embedding_router
+
+# New domain routers (previously unexposed functionality)
+from backend.defi_risk import router as defi_risk_router
+from backend.token_compliance import router as token_compliance_router
+from backend.protocol_risk import router as protocol_risk_router
 
 
 @asynccontextmanager
@@ -49,7 +52,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         description="Computational law platform for tokenized real-world assets (RWAs)",
-        version="0.1.0",
+        version="0.2.0",  # Version bump for flat domain restructure
         lifespan=lifespan,
     )
 
@@ -64,37 +67,45 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Include routers
-    app.include_router(qa_router)
-    app.include_router(decide_router)
-    app.include_router(rules_router)
-    app.include_router(ke_router)
-    app.include_router(production_router)
-    app.include_router(navigate_router)
-    app.include_router(decoder_router)
-    app.include_router(counterfactual_router)
-    app.include_router(analytics_router)
-    app.include_router(risk_router)
-    app.include_router(embedding_router)
+    # Include domain routers (existing endpoints - unchanged URLs)
+    app.include_router(rag_router)           # /qa
+    app.include_router(decide_router)        # /decide
+    app.include_router(rules_router)         # /rules
+    app.include_router(ke_router)            # /ke
+    app.include_router(production_router)    # /v2
+    app.include_router(jurisdiction_router)  # /navigate
+    app.include_router(decoder_router)       # /decoder, /decoder/counterfactual
+    app.include_router(analytics_router)     # /analytics
+    app.include_router(market_risk_router)   # /risk
+    app.include_router(embedding_router)     # /embedding/rules
+
+    # NEW domain routers (new endpoints)
+    app.include_router(defi_risk_router)         # /defi-risk
+    app.include_router(token_compliance_router)  # /token-compliance
+    app.include_router(protocol_risk_router)     # /protocol-risk
 
     @app.get("/")
     async def root():
         """Root endpoint."""
         return {
             "name": settings.app_name,
-            "version": "0.1.0",
+            "version": "0.2.0",
             "endpoints": {
+                # Existing endpoints
                 "qa": "/qa/ask - Factual Q&A",
                 "decide": "/decide - Regulatory decisions",
                 "rules": "/rules - Rule inspection",
                 "ke": "/ke/* - Knowledge Engineering workbench",
                 "v2": "/v2/* - Production API with compiled IR",
                 "navigate": "/navigate - Cross-border compliance navigation",
-                "decoder": "/decoder/* - Tiered explanation decoder",
-                "counterfactual": "/counterfactual/* - What-if analysis",
+                "decoder": "/decoder/* - Tiered explanation decoder and what-if analysis",
                 "analytics": "/analytics/* - Rule comparison, clustering, similarity search",
                 "risk": "/risk/* - Market risk analytics (VaR, CVaR, liquidity)",
                 "embedding": "/embedding/rules - Embedding rule CRUD",
+                # New endpoints
+                "defi-risk": "/defi-risk/* - DeFi protocol risk scoring",
+                "token-compliance": "/token-compliance/* - Howey test, GENIUS Act analysis",
+                "protocol-risk": "/protocol-risk/* - Blockchain protocol risk assessment",
             },
         }
 

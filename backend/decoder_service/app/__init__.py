@@ -1,1 +1,0 @@
-"""Decoder service application package."""

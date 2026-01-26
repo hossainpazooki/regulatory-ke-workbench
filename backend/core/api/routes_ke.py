@@ -15,16 +15,17 @@ from typing import Any
 
 from datetime import datetime, timezone
 
-from backend.rule_service.app.services import RuleLoader, DecisionEngine
-from backend.rule_service.app.services.schema import (
+from backend.rules import (
+    RuleLoader,
+    DecisionEngine,
     ConsistencyStatus,
     ConsistencyBlock,
     ConsistencySummary,
     ConsistencyEvidence,
 )
-from backend.verification_service.app.services import ConsistencyEngine, verify_rule
-from backend.analytics_service.app.services import ErrorPatternAnalyzer, DriftDetector
-from backend.rag_service.app.services import RuleContextRetriever
+from backend.verification import ConsistencyEngine, verify_rule
+from backend.analytics import ErrorPatternAnalyzer, DriftDetector
+from backend.rag import RuleContextRetriever
 from backend.core.visualization import (
     build_rulebook_outline,
     build_decision_trace_tree,

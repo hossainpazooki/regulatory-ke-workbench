@@ -13,25 +13,26 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.rule_service.app.services.jurisdiction.resolver import resolve_jurisdictions, get_equivalences
-from backend.rule_service.app.services.jurisdiction.evaluator import evaluate_jurisdiction
-from backend.rule_service.app.services.jurisdiction.conflicts import detect_conflicts
-from backend.rule_service.app.services.jurisdiction.pathway import (
+from backend.rules.jurisdiction import (
+    resolve_jurisdictions,
+    get_equivalences,
+    evaluate_jurisdiction,
+    detect_conflicts,
     synthesize_pathway,
     aggregate_obligations,
     estimate_timeline,
 )
 from backend.core.ontology.jurisdiction import JurisdictionCode, ApplicableJurisdiction
-from backend.rule_service.app.services.token_standards import (
+from backend.token_compliance import (
     analyze_token_compliance,
     TokenStandard,
 )
-from backend.rule_service.app.services.protocol_risk import (
+from backend.protocol_risk import (
     assess_protocol_risk,
     get_protocol_defaults,
     PROTOCOL_DEFAULTS,
 )
-from backend.rule_service.app.services.defi_risk import (
+from backend.defi_risk import (
     score_defi_protocol,
     DEFI_PROTOCOL_DEFAULTS,
     SmartContractRisk,
@@ -447,7 +448,7 @@ async def navigate(request: NavigateRequest) -> NavigateResponse:
 @router.get("/jurisdictions")
 async def list_jurisdictions() -> dict:
     """List all supported jurisdictions."""
-    from backend.database_service.app.services.database import get_db
+    from backend.storage.database import get_db
 
     with get_db() as conn:
         cursor = conn.execute(
@@ -464,7 +465,7 @@ async def list_jurisdictions() -> dict:
 @router.get("/regimes")
 async def list_regimes() -> dict:
     """List all regulatory regimes."""
-    from backend.database_service.app.services.database import get_db
+    from backend.storage.database import get_db
 
     with get_db() as conn:
         cursor = conn.execute(
@@ -490,7 +491,7 @@ async def list_regimes() -> dict:
 @router.get("/equivalences")
 async def list_equivalences() -> dict:
     """List all equivalence determinations."""
-    from backend.database_service.app.services.database import get_db
+    from backend.storage.database import get_db
 
     with get_db() as conn:
         cursor = conn.execute(

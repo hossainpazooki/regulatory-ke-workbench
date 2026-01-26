@@ -6,8 +6,8 @@ import pytest
 from fastapi.testclient import TestClient
 from pathlib import Path
 
-from backend.rule_service.app.services.loader import Rule, RuleLoader, SourceRef, DecisionLeaf
-from backend.rule_service.app.services.schema import (
+from backend.rules import Rule, RuleLoader, SourceRef, DecisionLeaf
+from backend.rules import (
     ConsistencyBlock,
     ConsistencySummary,
     ConsistencyEvidence,
